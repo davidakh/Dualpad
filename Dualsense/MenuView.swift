@@ -46,6 +46,8 @@ struct MenuView: View {
             } else if mode == .experimental {
                 ExperimentalView()
                     .transition(.blurReplace)
+            } else if mode == .debug {
+                DebugView()
             } else {
                 ContainerView(
                     emulationEnabled: Binding(
