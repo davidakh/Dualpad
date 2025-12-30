@@ -12,7 +12,7 @@ enum Mode: String, CaseIterable {
     case none = "Unknown"
     case emulation = "Emulation"
     case haptics = "Haptics"
-    case adaptive = "Adaptive"
+    case adaptive = "Adaptive Triggers"
     case light = "Light"
     case touchpad = "Touchpad"
     case gyro = "Gyro"
@@ -23,6 +23,7 @@ enum Mode: String, CaseIterable {
 struct MenuView: View {
     
     @State private var mode: Mode = .none
+    @State private var controllerManager = DualsenseManager()
     
     var body: some View {
         VStack {
@@ -31,13 +32,19 @@ struct MenuView: View {
                     .transition(.blurReplace)
             }
             
-            Controller()
+            Controller(controllerInfo: controllerManager.primaryController)
             
             if mode == .haptics {
                 HapticsView()
                     .transition(.blurReplace)
+            } else if mode == .adaptive {
+                AdaptiveView()
+                    .transition(.blurReplace)
             } else if mode == .light {
-                LightView()
+                LightView(dualsenseManager: controllerManager)
+                    .transition(.blurReplace)
+            } else if mode == .experimental {
+                ExperimentalView()
                     .transition(.blurReplace)
             } else {
                 ContainerView(

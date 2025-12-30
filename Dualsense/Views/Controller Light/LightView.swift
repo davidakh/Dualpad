@@ -8,13 +8,19 @@
 import SwiftUI
 
 struct LightView: View {
-    @State private var brightness: Double = 1
+    @State private var dualsenseManager: DualsenseManager
+    @State private var selectedColor: Color? = .accent
     
     @State private var playerEnabled = false
     @State private var playerHover = false
     
     @State private var micEnabled = false
     @State private var micHover = false
+    
+    init(dualsenseManager: DualsenseManager) {
+        self.dualsenseManager = dualsenseManager
+        self._selectedColor = State(initialValue: dualsenseManager.lightBarColor)
+    }
     
     var body: some View {
         VStack {
@@ -26,7 +32,7 @@ struct LightView: View {
                     
                     Spacer()
                     
-                    Text("\(brightness * 100, specifier: "%.0f")%")
+                    Text("\(dualsenseManager.lightBarBrightness * 100, specifier: "%.0f")%")
                         .font(.title3)
                         .foregroundStyle(.secondary)
                         .fontWeight(.regular)
@@ -38,7 +44,10 @@ struct LightView: View {
                         .foregroundStyle(.secondary)
                         .frame(width: 24, height: 24)
                     
-                    Slider(value: $brightness)
+                    Slider(value: Binding(
+                        get: { dualsenseManager.lightBarBrightness },
+                        set: { dualsenseManager.setLightBarBrightness($0) }
+                    ))
                     
                     Image(systemName: "sun.max.fill")
                         .font(.system(size: 12))
@@ -50,11 +59,44 @@ struct LightView: View {
             .background(Color.fill)
             .clipShape(RoundedRectangle(cornerRadius: 24))
             
+            HStack(alignment: .center, spacing: 6) {
+                Text("Color")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                
+                Spacer()
+                
+                Button(action: {
+                    selectedColor = nil
+                    dualsenseManager.setLightBarColor(nil)
+                }) {
+                    ZStack {
+                        Circle()
+                            .frame(width: 16, height: 16)
+                            .foregroundStyle(Color.fill)
+                        
+                        Image(systemName: "slash.circle")
+                            .foregroundStyle(.primary)
+                            .font(.system(size: 10))
+                    }
+                }
+                .background(selectedColor == nil ? Circle().stroke(Color.accentColor, lineWidth: 2).frame(width: 20, height: 20) : nil)
+                
+                ColorButton(color: .accent, selectedColor: $selectedColor, dualsenseManager: dualsenseManager)
+                ColorButton(color: .red, selectedColor: $selectedColor, dualsenseManager: dualsenseManager)
+                ColorButton(color: .green, selectedColor: $selectedColor, dualsenseManager: dualsenseManager)
+                ColorButton(color: .yellow, selectedColor: $selectedColor, dualsenseManager: dualsenseManager)
+                ColorButton(color: .purple, selectedColor: $selectedColor, dualsenseManager: dualsenseManager)
+            }
+            .padding(12)
+            .background(Color.fill)
+            .clipShape(RoundedRectangle(cornerRadius: 24))
+            
             Item(interactive: true,
                  enabled: $playerEnabled,
                  hover: $playerHover,
                  symbol: "person",
-                 color: .orange,
+                 color: .accent,
                  fill: true,
                  offset: 0,
                  wiggle: false,
@@ -77,12 +119,36 @@ struct LightView: View {
                  description: "Pulse",
                  showElement: false,
                  element: "chevron.right")
-            
-            Spacer()
         }
+        .buttonStyle(.plain)
+    }
+}
+
+// Helper view for color buttons
+struct ColorButton: View {
+    let color: Color
+    @Binding var selectedColor: Color?
+    let dualsenseManager: DualsenseManager
+    
+    var body: some View {
+        Button(action: {
+            selectedColor = color
+            dualsenseManager.setLightBarColor(color)
+        }) {
+            Circle()
+                .frame(width: 16, height: 16)
+                .foregroundStyle(color)
+        }
+        .background(
+            selectedColor == color ? 
+                Circle()
+                    .stroke(Color.white, lineWidth: 2)
+                    .frame(width: 20, height: 20)
+                : nil
+        )
     }
 }
 
 #Preview {
-    LightView()
+    LightView(dualsenseManager: DualsenseManager())
 }

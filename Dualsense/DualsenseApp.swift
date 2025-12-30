@@ -14,9 +14,9 @@ struct DualsenseApp: App {
     var body: some Scene {
         MenuBarExtra("Dualsense", systemImage: appData.menuSymbol) {
             MenuView()
-                .cornerRadius(32)
                 .environment(appData)
         }
         .menuBarExtraStyle(.window)
     }
 }
+
