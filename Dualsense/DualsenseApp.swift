@@ -9,9 +9,14 @@ import SwiftUI
 
 @main
 struct DualsenseApp: App {
+    @State private var appData = AppData()
+    
     var body: some Scene {
-        WindowGroup {
-            ContentView()
+        MenuBarExtra("Dualsense", systemImage: appData.menuSymbol) {
+            MenuView()
+                .cornerRadius(32)
+                .environment(appData)
         }
+        .menuBarExtraStyle(.window)
     }
 }
