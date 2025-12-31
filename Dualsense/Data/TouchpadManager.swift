@@ -19,17 +19,9 @@ class TouchpadManager {
         }
     }
     
-    var sensitivity: Float = 0.5 {
-        didSet {
-            UserDefaults.standard.set(sensitivity, forKey: "touchpadSensitivity")
-        }
-    }
+    var sensitivity: Float = 0.5
     
-    var acceleration: Float = 0.25 {
-        didSet {
-            UserDefaults.standard.set(acceleration, forKey: "touchpadAcceleration")
-        }
-    }
+    var acceleration: Float = 0.25
     
     private var scrollSpeed: Float = 0.9
     
@@ -80,19 +72,6 @@ class TouchpadManager {
     
     init(dualsenseManager: DualsenseManager? = nil) {
         self.dualsenseManager = dualsenseManager
-        loadSettings()
-    }
-    
-    private func loadSettings() {
-        if UserDefaults.standard.object(forKey: "touchpadSensitivity") != nil {
-            sensitivity = UserDefaults.standard.float(forKey: "touchpadSensitivity")
-        }
-        
-        if UserDefaults.standard.object(forKey: "touchpadAcceleration") != nil {
-            acceleration = UserDefaults.standard.float(forKey: "touchpadAcceleration")
-        }
-        
-        print("􀤂 Loaded touchpad settings - Sensitivity: \(sensitivity), Acceleration: \(acceleration)")
     }
     
     func configure(with manager: DualsenseManager) {

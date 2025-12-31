@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct LightView: View {
+    @Environment(AppData.self) private var appData
     @State private var dualsenseManager: DualsenseManager
     @State private var selectedColor: Color? = .accent
     
@@ -32,7 +33,7 @@ struct LightView: View {
                     
                     Spacer()
                     
-                    Text("\(dualsenseManager.lightBarBrightness * 100, specifier: "%.0f")%")
+                    Text("\(appData.lightBrightness * 100, specifier: "%.0f")%")
                         .font(.body)
                         .foregroundStyle(.secondary)
                         .fontWeight(.regular)
@@ -44,10 +45,7 @@ struct LightView: View {
                         .foregroundStyle(.secondary)
                         .frame(width: 24, height: 24)
                     
-                    Slider(value: Binding(
-                        get: { dualsenseManager.lightBarBrightness },
-                        set: { dualsenseManager.setLightBarBrightness($0) }
-                    ))
+                    Slider(value: $appData.lightBrightness)
                     
                     Image(systemName: "sun.max.fill")
                         .font(.system(size: 12))

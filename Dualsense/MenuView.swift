@@ -24,6 +24,7 @@ struct MenuView: View {
     
     @State private var mode: Mode = .none
     @State private var controllerManager = DualsenseManager()
+    @State private var appData = AppData()
     
     var body: some View {
         VStack {
@@ -91,6 +92,22 @@ struct MenuView: View {
         }
         .padding(8)
         .environment(controllerManager)
+        .environment(appData)
+        .onAppear {
+            appData.syncToDualsenseManager(controllerManager)
+        }
+        .onChange(of: appData.lightBrightness) { _, newValue in
+            controllerManager.setLightBarBrightness(newValue)
+        }
+        .onChange(of: appData.mouseActive) { _, newValue in
+            controllerManager.touchpadManager?.isEnabled = newValue
+        }
+        .onChange(of: appData.mouseSensitivity) { _, newValue in
+            controllerManager.touchpadManager?.sensitivity = Float(newValue)
+        }
+        .onChange(of: appData.mouseAcceleration) { _, newValue in
+            controllerManager.touchpadManager?.acceleration = Float(newValue)
+        }
     }
 }
 

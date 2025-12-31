@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TouchpadView: View {
     @Environment(DualsenseManager.self) private var dualsenseManager
+    @Environment(AppData.self) private var appData
     @State private var mouseHover = false
     @State private var menuPresent = false
     
@@ -27,10 +28,7 @@ struct TouchpadView: View {
             // Main toggle
             VStack(alignment: .center, spacing: 2) {
                 Item(interactive: true,
-                     enabled: Binding(
-                        get: { touchpadManager.isEnabled },
-                        set: { touchpadManager.isEnabled = $0 }
-                     ),
+                     enabled: $appData.mouseActive,
                      hover: $mouseHover,
                      symbol: "cursorarrow.click.2",
                      color: .accent,
@@ -39,7 +37,7 @@ struct TouchpadView: View {
                      animation: .bounce,
                      name: "Touchpad to Mouse",
                      showDescription: true,
-                     description: touchpadManager.isEnabled ? "System-wide cursor control" : "Enable for mouse control",
+                     description: appData.mouseActive ? "System-wide cursor control" : "Enable for mouse control",
                      showElement: true,
                      element: "slider.horizontal.3",
                      isElementButton: true,
@@ -67,10 +65,7 @@ struct TouchpadView: View {
                                 .foregroundStyle(.secondary)
                                 .frame(width: 24, height: 24)
                             
-                            Slider(value: Binding(
-                                get: { Double(touchpadManager.sensitivity) },
-                                set: { touchpadManager.sensitivity = Float($0) }
-                            ), in: 0.1...1.0)
+                            Slider(value: $appData.mouseSensitivity, in: 0.1...1.0)
                             
                             Image(systemName: "hare")
                                 .font(.system(size: 10))
@@ -97,10 +92,7 @@ struct TouchpadView: View {
                                 .foregroundStyle(.secondary)
                                 .frame(width: 24, height: 24)
                             
-                            Slider(value: Binding(
-                                get: { Double(touchpadManager.acceleration) },
-                                set: { touchpadManager.acceleration = Float($0) }
-                            ), in: 0.1...1.0)
+                            Slider(value: $appData.mouseAcceleration, in: 0.1...1.0)
                             
                             Image(systemName: "gauge.with.dots.needle.100percent")
                                 .font(.system(size: 12))
@@ -128,7 +120,7 @@ struct TouchpadView: View {
                     }
                 }
                 .transition(.opacity.combined(with: .move(edge: .top)))
-                .animation(.easeInOut, value: touchpadManager.isEnabled)
+                .animation(.easeInOut, value: appData.mouseActive)
             }
         }
     }
@@ -136,9 +128,11 @@ struct TouchpadView: View {
 
 #Preview {
     @Previewable @State var manager = DualsenseManager()
+    @Previewable @State var appData = AppData()
     
     TouchpadView()
         .environment(manager)
+        .environment(appData)
         .frame(width: 400)
         .padding()
 }
