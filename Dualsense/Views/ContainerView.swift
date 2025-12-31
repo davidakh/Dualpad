@@ -34,7 +34,7 @@ struct ContainerView: View {
     @State private var debugHover = false
     
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 2) {
             Item(interactive: false,
                  enabled: $emulationEnabled,
                  hover: $emulationHover,

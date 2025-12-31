@@ -12,47 +12,49 @@ struct Controller: View {
     let controllerInfo: DualSenseInfo?
     
     var body: some View {
-        HStack {
-            Image(systemName: "playstation.logo")
-                .foregroundStyle(.white)
-                .font(.system(size: 16))
-                .frame(width: 36, height: 36)
-                .background(.accent)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-            
-            VStack(alignment: .leading, spacing: 0) {
-                Text(controllerInfo?.name ?? "No Controller")
-                    .font(.title3)
-                    .fontWeight(.semibold)
+        VStack {
+            HStack {
+                Image(systemName: "playstation.logo")
+                    .foregroundStyle(.white)
+                    .font(.system(size: 18))
+                    .frame(width: 36, height: 36)
+                    .background(.accent)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
                 
-                HStack(spacing: 4) {
-                    Circle()
-                        .frame(width: 4, height: 4)
-                        .foregroundStyle(controllerInfo?.isConnected == true ? .green : .red)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(controllerInfo?.name ?? "No Controller")
+                        .font(.title3)
+                        .fontWeight(.semibold)
                     
-                    if let info = controllerInfo {
-                        Text("\(info.connectionType.description)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                    HStack(spacing: 4) {
+                        Circle()
+                            .frame(width: 4, height: 4)
+                            .foregroundStyle(controllerInfo?.isConnected == true ? .green : .red)
                         
-                        if info.batteryPercentage != nil || info.batteryState != .discharging {
-                            Text("• \(info.batteryStatusDescription)")
+                        if let info = controllerInfo {
+                            Text("\(info.connectionType.description)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            
+                            if info.batteryPercentage != nil || info.batteryState != .discharging {
+                                Text("• \(info.batteryStatusDescription)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        } else {
+                            Text("Not Connected")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
-                    } else {
-                        Text("Not Connected")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
                     }
                 }
+                
+                Spacer()
             }
-            
-            Spacer()
+            .padding(12)
+            .background(Color.fill)
+            .clipShape(RoundedRectangle(cornerRadius: 24))
         }
-        .padding(12)
-        .background(Color.fill)
-        .clipShape(RoundedRectangle(cornerRadius: 24))
     }
 }
 

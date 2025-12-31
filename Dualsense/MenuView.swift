@@ -43,6 +43,9 @@ struct MenuView: View {
             } else if mode == .light {
                 LightView(dualsenseManager: controllerManager)
                     .transition(.blurReplace)
+            } else if mode == .touchpad {
+                TouchpadView()
+                    .transition(.blurReplace)
             } else if mode == .experimental {
                 ExperimentalView()
                     .transition(.blurReplace)
@@ -87,6 +90,7 @@ struct MenuView: View {
             }
         }
         .padding(8)
+        .environment(controllerManager)
     }
 }
 

@@ -2,6 +2,9 @@ import Foundation
 import GameController
 import SwiftUI
 import AppKit
+import CoreGraphics
+import ApplicationServices
+import CoreHaptics
 
 enum ConnectionType {
     case bluetooth
@@ -70,6 +73,41 @@ class DualsenseManager {
         }
     }
     
+    // Button states
+    struct ButtonStates {
+        var triangle = false
+        var x = false
+        var circle = false
+        var square = false
+        var dpadUp = false
+        var dpadDown = false
+        var dpadLeft = false
+        var dpadRight = false
+        var r1 = false
+        var l1 = false
+        var r3 = false
+        var l3 = false
+        var playstation = false
+        var mic = false
+        var options = false
+        var create = false
+        var touchpad = false
+    }
+    
+    struct TouchpadStates {
+        var primary: (x: Float, y: Float) = (0, 0)
+        var secondary: (x: Float, y: Float) = (0, 0)
+    }
+    
+    var buttonStates = ButtonStates()
+    var touchpadStates = TouchpadStates()
+    
+    // Touchpad Manager
+    private(set) var touchpadManager: TouchpadManager?
+    
+    // Background monitor for system-wide events
+    private var backgroundMonitor: Any?
+    
     var primaryController: DualSenseInfo? {
         connectedControllers.first
     }
@@ -102,11 +140,15 @@ class DualsenseManager {
     init() {
         setupControllerNotifications()
         checkForExistingControllers()
+        
+        // Initialize touchpad manager
+        touchpadManager = TouchpadManager(dualsenseManager: self)
     }
     
     deinit {
         removeControllerNotifications()
         stopDiscovery()
+        removeBackgroundMonitor()
     }
     
     private func setupControllerNotifications() {
@@ -159,6 +201,9 @@ class DualsenseManager {
     private func handleControllerConnected(_ controller: GCController) {
         guard isDualSenseController(controller) else { return }
         
+        // Enable background event monitoring
+        GCController.shouldMonitorBackgroundEvents = true
+        
         let info = createControllerInfo(from: controller)
         
         if !connectedControllers.contains(where: { $0.name == info.name }) {
@@ -170,6 +215,9 @@ class DualsenseManager {
             self.controller = controller
             configureController(controller)
             print("DualSense Controller connected: \(info.name) via \(info.connectionType.description)")
+            
+            // Install background monitor
+            installBackgroundMonitor()
         }
     }
     
@@ -177,9 +225,16 @@ class DualsenseManager {
         let controllerName = controller.vendorName ?? "DualSense Controller"
         connectedControllers.removeAll { $0.name == controllerName }
         
+        // Stop touchpad mouse control when controller disconnects
+        touchpadManager?.isEnabled = false
+        
+        // Remove background monitor
+        removeBackgroundMonitor()
+        
         // Clear primary controller if it was disconnected
         if self.controller == controller {
             self.controller = nil
+            buttonStates = ButtonStates()
             print("DualSense Controller disconnected")
             
             // Try to reconnect to another DualSense if available
@@ -241,6 +296,63 @@ class DualsenseManager {
         if let haptics = controller.haptics {
             print("Haptics available: \(haptics.supportedLocalities)")
         }
+        
+        // Configure button handlers for DualSense
+        if let dualSensePad = controller.extendedGamepad as? GCDualSenseGamepad {
+            dualSensePad.buttonA.valueChangedHandler = { [weak self] (_: GCControllerButtonInput, value: Float, pressed: Bool) in
+                self?.buttonStates.x = pressed
+            }
+            dualSensePad.buttonB.valueChangedHandler = { [weak self] (_: GCControllerButtonInput, value: Float, pressed: Bool) in
+                self?.buttonStates.circle = pressed
+            }
+            dualSensePad.buttonY.valueChangedHandler = { [weak self] (_: GCControllerButtonInput, value: Float, pressed: Bool) in
+                self?.buttonStates.triangle = pressed
+            }
+            dualSensePad.buttonX.valueChangedHandler = { [weak self] (_: GCControllerButtonInput, value: Float, pressed: Bool) in
+                self?.buttonStates.square = pressed
+            }
+            dualSensePad.dpad.up.valueChangedHandler = { [weak self] (_: GCControllerButtonInput, value: Float, pressed: Bool) in
+                self?.buttonStates.dpadUp = pressed
+            }
+            dualSensePad.dpad.down.valueChangedHandler = { [weak self] (_: GCControllerButtonInput, value: Float, pressed: Bool) in
+                self?.buttonStates.dpadDown = pressed
+            }
+            dualSensePad.dpad.left.valueChangedHandler = { [weak self] (_: GCControllerButtonInput, value: Float, pressed: Bool) in
+                self?.buttonStates.dpadLeft = pressed
+            }
+            dualSensePad.dpad.right.valueChangedHandler = { [weak self] (_: GCControllerButtonInput, value: Float, pressed: Bool) in
+                self?.buttonStates.dpadRight = pressed
+            }
+            dualSensePad.rightShoulder.valueChangedHandler = { [weak self] (_: GCControllerButtonInput, value: Float, pressed: Bool) in
+                self?.buttonStates.r1 = pressed
+            }
+            dualSensePad.leftShoulder.valueChangedHandler = { [weak self] (_: GCControllerButtonInput, value: Float, pressed: Bool) in
+                self?.buttonStates.l1 = pressed
+            }
+            dualSensePad.leftThumbstickButton?.valueChangedHandler = { [weak self] (_: GCControllerButtonInput, value: Float, pressed: Bool) in
+                self?.buttonStates.l3 = pressed
+            }
+            dualSensePad.rightThumbstickButton?.valueChangedHandler = { [weak self] (_: GCControllerButtonInput, value: Float, pressed: Bool) in
+                self?.buttonStates.r3 = pressed
+            }
+            dualSensePad.buttonMenu.valueChangedHandler = { [weak self] (_: GCControllerButtonInput, value: Float, pressed: Bool) in
+                self?.buttonStates.options = pressed
+            }
+            dualSensePad.buttonOptions?.valueChangedHandler = { [weak self] (_: GCControllerButtonInput, value: Float, pressed: Bool) in
+                self?.buttonStates.create = pressed
+            }
+            dualSensePad.touchpadButton.valueChangedHandler = { [weak self] (_: GCControllerButtonInput, value: Float, pressed: Bool) in
+                self?.buttonStates.touchpad = pressed
+            }
+            
+            dualSensePad.touchpadPrimary.valueChangedHandler = { [weak self] (_: GCControllerDirectionPad, xValue: Float, yValue: Float) in
+                self?.touchpadStates.primary = (xValue, yValue)
+            }
+            
+            dualSensePad.touchpadSecondary.valueChangedHandler = { [weak self] (_: GCControllerDirectionPad, xValue: Float, yValue: Float) in
+                self?.touchpadStates.secondary = (xValue, yValue)
+            }
+        }
     }
     
     private func updateLightBarColor() {
@@ -287,6 +399,24 @@ class DualsenseManager {
     func stopDiscovery() {
         GCController.stopWirelessControllerDiscovery()
         print("Stopped wireless controller discovery")
+    }
+    
+    // MARK: - Background Monitor
+    
+    /// Installs a global event monitor for background input events
+    private func installBackgroundMonitor() {
+        guard backgroundMonitor == nil else { return }
+        backgroundMonitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { _ in
+            // No-op: this keeps the runloop active and events flowing for background operation
+        }
+    }
+    
+    /// Removes the background input event monitor
+    private func removeBackgroundMonitor() {
+        if let monitor = backgroundMonitor {
+            NSEvent.removeMonitor(monitor)
+            backgroundMonitor = nil
+        }
     }
 }
 

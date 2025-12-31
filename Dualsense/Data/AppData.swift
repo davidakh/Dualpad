@@ -12,7 +12,7 @@ import SwiftUI
 class AppData {
     // Menu
     var mode: Mode = .none
-    var menuSymbol: String = "playstation.logo"
+    var menuSymbol: String = "gamecontroller.fill"
     
 }
 

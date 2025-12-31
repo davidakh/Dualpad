@@ -41,7 +41,7 @@ struct Row: View {
                     .font(.title3)
                     .fontWeight(.medium)
                 
-                if showDescription {
+                if showDescription && enabled {
                     Text(description)
                         .font(.caption)
                         .foregroundStyle(.secondary)

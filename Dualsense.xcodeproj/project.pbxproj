@@ -6,8 +6,33 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		4039D1C32F038BC90079F55B /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4039D1C22F038BC90079F55B /* IOKit.framework */; };
+		4039D1C52F038BD30079F55B /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4039D1C42F038BD30079F55B /* CoreAudio.framework */; };
+		4039D1C72F038BDC0079F55B /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4039D1C62F038BDC0079F55B /* AudioToolbox.framework */; };
+		4039D1C92F038BE30079F55B /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4039D1C82F038BE30079F55B /* AVFoundation.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		4039D1DF2F038D120079F55B /* Embed System Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(SYSTEM_EXTENSIONS_FOLDER_PATH)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			name = "Embed System Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		4039D1442F0347570079F55B /* Dualsense.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dualsense.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4039D1C22F038BC90079F55B /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		4039D1C42F038BD30079F55B /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		4039D1C62F038BDC0079F55B /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		4039D1C82F038BE30079F55B /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		4039D1D02F038D120079F55B /* DriverKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DriverKit.framework; path = System/Library/Frameworks/DriverKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -23,6 +48,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4039D1C92F038BE30079F55B /* AVFoundation.framework in Frameworks */,
+				4039D1C52F038BD30079F55B /* CoreAudio.framework in Frameworks */,
+				4039D1C32F038BC90079F55B /* IOKit.framework in Frameworks */,
+				4039D1C72F038BDC0079F55B /* AudioToolbox.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -33,6 +62,7 @@
 			isa = PBXGroup;
 			children = (
 				4039D1462F0347570079F55B /* Dualsense */,
+				4039D1C12F038BC90079F55B /* Frameworks */,
 				4039D1452F0347570079F55B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -45,6 +75,18 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		4039D1C12F038BC90079F55B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4039D1C82F038BE30079F55B /* AVFoundation.framework */,
+				4039D1C62F038BDC0079F55B /* AudioToolbox.framework */,
+				4039D1C42F038BD30079F55B /* CoreAudio.framework */,
+				4039D1C22F038BC90079F55B /* IOKit.framework */,
+				4039D1D02F038D120079F55B /* DriverKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -55,6 +97,7 @@
 				4039D1402F0347570079F55B /* Sources */,
 				4039D1412F0347570079F55B /* Frameworks */,
 				4039D1422F0347570079F55B /* Resources */,
+				4039D1DF2F038D120079F55B /* Embed System Extensions */,
 			);
 			buildRules = (
 			);
