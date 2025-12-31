@@ -45,7 +45,10 @@ struct LightView: View {
                         .foregroundStyle(.secondary)
                         .frame(width: 24, height: 24)
                     
-                    Slider(value: $appData.lightBrightness)
+                    Slider(value: Binding(
+                        get: { appData.lightBrightness },
+                        set: { appData.lightBrightness = $0 }
+                    ))
                     
                     Image(systemName: "sun.max.fill")
                         .font(.system(size: 12))
@@ -95,7 +98,7 @@ struct LightView: View {
                  hover: $playerHover,
                  symbol: "person",
                  color: .accent,
-                 fill: true,
+                 fill: false,
                  offset: 0,
                  animation: .none,
                  name: "Player Light",
@@ -109,7 +112,7 @@ struct LightView: View {
                  hover: $micHover,
                  symbol: "mic",
                  color: .orange,
-                 fill: true,
+                 fill: false,
                  offset: 0,
                  animation: .pulse,
                  name: "Mic Light",

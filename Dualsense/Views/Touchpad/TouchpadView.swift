@@ -28,7 +28,10 @@ struct TouchpadView: View {
             // Main toggle
             VStack(alignment: .center, spacing: 2) {
                 Item(interactive: true,
-                     enabled: $appData.mouseActive,
+                     enabled: Binding(
+                        get: { appData.mouseActive },
+                        set: { appData.mouseActive = $0 }
+                     ),
                      hover: $mouseHover,
                      symbol: "cursorarrow.click.2",
                      color: .accent,
@@ -65,7 +68,10 @@ struct TouchpadView: View {
                                 .foregroundStyle(.secondary)
                                 .frame(width: 24, height: 24)
                             
-                            Slider(value: $appData.mouseSensitivity, in: 0.1...1.0)
+                            Slider(value: Binding(
+                                get: { appData.mouseSensitivity },
+                                set: { appData.mouseSensitivity = $0 }
+                            ), in: 0.1...1.0)
                             
                             Image(systemName: "hare")
                                 .font(.system(size: 10))
@@ -92,7 +98,10 @@ struct TouchpadView: View {
                                 .foregroundStyle(.secondary)
                                 .frame(width: 24, height: 24)
                             
-                            Slider(value: $appData.mouseAcceleration, in: 0.1...1.0)
+                            Slider(value: Binding(
+                                get: { appData.mouseAcceleration },
+                                set: { appData.mouseAcceleration = $0 }
+                            ), in: 0.1...1.0)
                             
                             Image(systemName: "gauge.with.dots.needle.100percent")
                                 .font(.system(size: 12))
