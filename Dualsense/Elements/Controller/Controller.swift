@@ -23,7 +23,7 @@ struct Controller: View {
                 
                 VStack(alignment: .leading, spacing: 0) {
                     Text(controllerInfo?.name ?? "No Controller")
-                        .font(.title3)
+                        .font(.body)
                         .fontWeight(.semibold)
                     
                     HStack(spacing: 4) {

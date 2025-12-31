@@ -10,6 +10,7 @@ import SwiftUI
 struct TouchpadView: View {
     @Environment(DualsenseManager.self) private var dualsenseManager
     @State private var mouseHover = false
+    @State private var menuPresent = false
     
     var body: some View {
         if let touchpadManager = dualsenseManager.touchpadManager {
@@ -34,130 +35,82 @@ struct TouchpadView: View {
                      symbol: "cursorarrow.click.2",
                      color: .accent,
                      fill: false,
-                     offset: 0.5,
-                     wiggle: true,
+                     offset: 0,
+                     animation: .bounce,
                      name: "Touchpad to Mouse",
                      showDescription: true,
                      description: touchpadManager.isEnabled ? "System-wide cursor control" : "Enable for mouse control",
                      showElement: true,
-                     element: "slider.horizontal.3")
+                     element: "slider.horizontal.3",
+                     isElementButton: true,
+                     elementButtonAction: {
+                        withAnimation {
+                            menuPresent.toggle()
+                        }
+                     })
             }
             
-            // Settings (only shown when enabled)
-            if touchpadManager.isEnabled {
+            if menuPresent {
                 VStack(spacing: 8) {
-                    // Sensitivity slider
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
-                            Image(systemName: "hare.fill")
-                                .foregroundStyle(.secondary)
-                                .font(.caption)
                             Text("Sensitivity")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                                .font(.body)
+                                .fontWeight(.semibold)
+                            
                             Spacer()
-                            Text("\(Int(touchpadManager.sensitivity * 100))%")
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
-                                .monospacedDigit()
                         }
                         
-                        Slider(value: Binding(
-                            get: { Double(touchpadManager.sensitivity) },
-                            set: { touchpadManager.sensitivity = Float($0) }
-                        ), in: 0.1...1.0)
-                        .tint(.accent)
+                        HStack(spacing: 4) {
+                            Image(systemName: "tortoise")
+                                .font(.system(size: 10))
+                                .foregroundStyle(.secondary)
+                                .frame(width: 24, height: 24)
+                            
+                            Slider(value: Binding(
+                                get: { Double(touchpadManager.sensitivity) },
+                                set: { touchpadManager.sensitivity = Float($0) }
+                            ), in: 0.1...1.0)
+                            
+                            Image(systemName: "hare")
+                                .font(.system(size: 10))
+                                .foregroundStyle(.secondary)
+                                .frame(width: 24, height: 24)
+                        }
                     }
-                    .padding(.horizontal, 16)
+                    .padding(12)
+                    .background(Color.fill)
+                    .clipShape(RoundedRectangle(cornerRadius: 24))
                     
-                    // Acceleration slider
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
-                            Image(systemName: "speedometer")
-                                .foregroundStyle(.secondary)
-                                .font(.caption)
                             Text("Acceleration")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                                .font(.body)
+                                .fontWeight(.semibold)
+                            
                             Spacer()
-                            Text("\(Int(touchpadManager.acceleration * 100))%")
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
-                                .monospacedDigit()
                         }
                         
-                        Slider(value: Binding(
-                            get: { Double(touchpadManager.acceleration) },
-                            set: { touchpadManager.acceleration = Float($0) }
-                        ), in: 0.0...1.0)
-                        .tint(.accent)
-                    }
-                    .padding(.horizontal, 16)
-                    
-                    // Scroll speed slider
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Image(systemName: "scroll")
+                        HStack(spacing: 4) {
+                            Image(systemName: "gauge.with.dots.needle.0percent")
+                                .font(.system(size: 12))
                                 .foregroundStyle(.secondary)
-                                .font(.caption)
-                            Text("Scroll Speed")
-                                .font(.subheadline)
+                                .frame(width: 24, height: 24)
+                            
+                            Slider(value: Binding(
+                                get: { Double(touchpadManager.acceleration) },
+                                set: { touchpadManager.acceleration = Float($0) }
+                            ), in: 0.1...1.0)
+                            
+                            Image(systemName: "gauge.with.dots.needle.100percent")
+                                .font(.system(size: 12))
                                 .foregroundStyle(.secondary)
-                            Spacer()
-                            Text("\(Int(touchpadManager.scrollSpeed * 100))%")
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
-                                .monospacedDigit()
-                        }
-                        
-                        Slider(value: Binding(
-                            get: { Double(touchpadManager.scrollSpeed) },
-                            set: { touchpadManager.scrollSpeed = Float($0) }
-                        ), in: 0.1...1.0)
-                        .tint(.accent)
-                    }
-                    .padding(.horizontal, 16)
-                    
-                    // Gesture help
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "hand.point.up.left.fill")
-                                .foregroundStyle(.tertiary)
-                                .font(.caption)
-                            Text("One finger: Move cursor")
-                                .font(.caption2)
-                                .foregroundStyle(.tertiary)
-                        }
-                        
-                        HStack(spacing: 8) {
-                            Image(systemName: "hand.point.up.left.and.text.fill")
-                                .foregroundStyle(.tertiary)
-                                .font(.caption)
-                            Text("Two fingers: Scroll")
-                                .font(.caption2)
-                                .foregroundStyle(.tertiary)
-                        }
-                        
-                        HStack(spacing: 8) {
-                            Image(systemName: "hand.tap.fill")
-                                .foregroundStyle(.tertiary)
-                                .font(.caption)
-                            Text("Two finger tap: Right-click")
-                                .font(.caption2)
-                                .foregroundStyle(.tertiary)
-                        }
-                        
-                        HStack(spacing: 8) {
-                            Image(systemName: "button.programmable")
-                                .foregroundStyle(.tertiary)
-                                .font(.caption)
-                            Text("Button press: Left-click")
-                                .font(.caption2)
-                                .foregroundStyle(.tertiary)
+                                .frame(width: 24, height: 24)
                         }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 4)
+                    .padding(12)
+                    .background(Color.fill)
+                    .clipShape(RoundedRectangle(cornerRadius: 24))
                     
                     // Accessibility permission warning
                     if !TouchpadManager.checkAccessibilityPermissions() {
@@ -172,7 +125,6 @@ struct TouchpadView: View {
                         .padding(8)
                         .background(.orange.opacity(0.1))
                         .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .padding(.horizontal, 16)
                     }
                 }
                 .transition(.opacity.combined(with: .move(edge: .top)))

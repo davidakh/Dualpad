@@ -13,11 +13,11 @@ struct AdaptiveView: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Image(systemName: "l.circle.fill")
-                        .font(.title3)
+                        .font(.body)
                         .foregroundStyle(.secondary)
                         .fontWeight(.semibold)
                     Text("Left Trigger Effect")
-                        .font(.title3)
+                        .font(.body)
                         .fontWeight(.semibold)
                     
                     Spacer()
@@ -56,11 +56,11 @@ struct AdaptiveView: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Image(systemName: "r.circle.fill")
-                        .font(.title3)
+                        .font(.body)
                         .foregroundStyle(.secondary)
                         .fontWeight(.semibold)
                     Text("Right Trigger Effect")
-                        .font(.title3)
+                        .font(.body)
                         .fontWeight(.semibold)
                     
                     Spacer()

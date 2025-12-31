@@ -27,13 +27,13 @@ struct LightView: View {
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text("Brightness")
-                        .font(.title3)
+                        .font(.body)
                         .fontWeight(.semibold)
                     
                     Spacer()
                     
                     Text("\(dualsenseManager.lightBarBrightness * 100, specifier: "%.0f")%")
-                        .font(.title3)
+                        .font(.body)
                         .foregroundStyle(.secondary)
                         .fontWeight(.regular)
                 }
@@ -61,7 +61,7 @@ struct LightView: View {
             
             HStack(alignment: .center, spacing: 6) {
                 Text("Color")
-                    .font(.title3)
+                    .font(.body)
                     .fontWeight(.semibold)
                 
                 Spacer()
@@ -99,7 +99,7 @@ struct LightView: View {
                  color: .accent,
                  fill: true,
                  offset: 0,
-                 wiggle: false,
+                 animation: .none,
                  name: "Player Light",
                  showDescription: false,
                  description: "Default",
@@ -113,7 +113,7 @@ struct LightView: View {
                  color: .orange,
                  fill: true,
                  offset: 0,
-                 wiggle: false,
+                 animation: .pulse,
                  name: "Mic Light",
                  showDescription: false,
                  description: "Pulse",

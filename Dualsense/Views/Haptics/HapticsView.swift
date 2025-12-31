@@ -21,7 +21,7 @@ struct HapticsView: View {
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text("Haptic Feedback")
-                        .font(.title3)
+                        .font(.body)
                         .fontWeight(.semibold)
                     
                     Spacer()
@@ -52,12 +52,16 @@ struct HapticsView: View {
                  color: .accent,
                  fill: true,
                  offset: 0,
-                 wiggle: true,
+                 animation: .wiggle,
                  name: "Controller Haptics",
                  showDescription: true,
                  description: "Requires a wired connection",
                  showElement: true,
-                 element: "slider.horizontal.3")
+                 element: "slider.horizontal.3",
+                 isElementButton: true,
+                 elementButtonAction: {
+                     print("Open haptics settings")
+                 })
             
             Item(interactive: true,
                  enabled: $micEnabled,
@@ -66,7 +70,7 @@ struct HapticsView: View {
                  color: .pink,
                  fill: false,
                  offset: 0,
-                 wiggle: false,
+                 animation: .bounce,
                  name: "Audio Haptics",
                  showDescription: true,
                  description: "Requires a wired connection",

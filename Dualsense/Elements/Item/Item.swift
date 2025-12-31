@@ -16,15 +16,17 @@ struct Item: View {
     var color: Color
     var fill: Bool
     var offset: CGFloat
-    var wiggle: Bool
+    var animation: SymbolAnimation
     var name: String
     var showDescription: Bool
     var description: String
     var showElement: Bool
     var element: String
+    var isElementButton: Bool = false
+    var elementButtonAction: (() -> Void)? = nil
     
     var body: some View {
-        Row(interactive: interactive, enabled: enabled, symbol: symbol, color: color, fill: fill, offset: offset, wiggle: wiggle, name: name, showDescription: showDescription, description: description, showElement: showElement, element: element)
+        Row(interactive: interactive, enabled: enabled, symbol: symbol, color: color, fill: fill, offset: offset, animation: animation, name: name, showDescription: showDescription, description: description, showElement: showElement, element: element, isElementButton: isElementButton, elementButtonAction: elementButtonAction)
             .background(hover ? .fill : .clear)
             .clipShape(RoundedRectangle(cornerRadius: 20))
             .contentShape(Rectangle())
