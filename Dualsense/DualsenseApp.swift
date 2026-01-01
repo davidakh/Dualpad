@@ -45,6 +45,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         floatingPanel?.delegate = self
         floatingPanel?.contentView = NSHostingView(
             rootView: MenuView()
+                .frame(width: 280)
                 .clipShape(RoundedRectangle(cornerRadius: 28))
                 .environment(appData)
         )

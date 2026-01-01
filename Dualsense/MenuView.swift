@@ -21,27 +21,38 @@ enum Mode: String, CaseIterable {
 }
 
 struct MenuView: View {
+    @State private var containerPresent = true
     @State private var mode: Mode = .none
     @State private var controllerManager = DualsenseManager()
     @State private var appData = AppData()
     
     var body: some View {
-        VStack {
+        VStack(spacing: 6) {
             if mode != .none {
                 Toolbar(name: .constant(mode.rawValue), onBack: { mode = .none })
                     .transition(.blurReplace)
             } else {
                 Controller(controllerInfo: controllerManager.primaryController)
             }
+            
+            if containerPresent {
                 modeView()
+            }
+            
+            Button(action: {
+                withAnimation {
+                    containerPresent.toggle()
+                }
+            }) {
+                Arrow(symbol: containerPresent ? "chevron.compact.up" : "chevron.compact.down")
+            }
         }
-        .padding(.top, 9)
-        .padding(.horizontal, 8)
-        .padding(.bottom, 8)
+        .padding(6)
         .glassEffect(in: RoundedRectangle(cornerRadius: 28))
         .shadow(color: .black.opacity(0.3), radius: 16, x: 0, y: 8)
-        .frame(width: 320)
+        .frame(width: 280)
         .fixedSize()
+        .buttonStyle(.plain)
         .environment(controllerManager)
         .environment(appData)
         .onAppear {
@@ -126,5 +137,5 @@ struct MenuView: View {
 
 #Preview {
     MenuView()
-        .frame(width: 320)
+        .frame(width: 280)
 }

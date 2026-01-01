@@ -10,7 +10,7 @@ import SwiftUI
 struct Item: View {
     
     var interactive: Bool
-    var hoverable: Bool = false
+    var hoverable: Bool = true
     @Binding var enabled: Bool
     @Binding var hover: Bool
     var symbol: String
