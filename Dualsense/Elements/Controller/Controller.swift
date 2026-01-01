@@ -14,12 +14,10 @@ struct Controller: View {
     var body: some View {
         VStack {
             HStack {
-                Image(systemName: "playstation.logo")
-                    .foregroundStyle(.white)
-                    .font(.system(size: 18))
+                Image("Dualsense")
+                    .resizable()
                     .frame(width: 36, height: 36)
-                    .background(.accent)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
                 
                 VStack(alignment: .leading, spacing: 0) {
                     Text(controllerInfo?.name ?? "No Controller")

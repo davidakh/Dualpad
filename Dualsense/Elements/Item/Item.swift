@@ -10,6 +10,7 @@ import SwiftUI
 struct Item: View {
     
     var interactive: Bool
+    var hoverable: Bool = false
     @Binding var enabled: Bool
     @Binding var hover: Bool
     var symbol: String
@@ -36,8 +37,10 @@ struct Item: View {
                 }
             }
             .onHover { hovering in
-                withAnimation {
-                    hover.toggle()
+                if hoverable {
+                    withAnimation {
+                        hover = hovering
+                    }
                 }
             }
     }

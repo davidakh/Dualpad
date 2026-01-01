@@ -34,9 +34,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             button.target = self
         }
         
-        // Create floating panel
+        // Create floating panel - extra size to accommodate shadow
         floatingPanel = FloatingPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 320, height: 400),
+            contentRect: NSRect(x: 0, y: 0, width: 280, height: 500),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
@@ -45,6 +45,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         floatingPanel?.delegate = self
         floatingPanel?.contentView = NSHostingView(
             rootView: MenuView()
+                .clipShape(RoundedRectangle(cornerRadius: 28))
                 .environment(appData)
         )
         
@@ -88,15 +89,19 @@ class FloatingPanel: NSPanel {
     override init(contentRect: NSRect, styleMask style: NSWindow.StyleMask, backing backingStoreType: NSWindow.BackingStoreType, defer flag: Bool) {
         super.init(contentRect: contentRect, styleMask: style, backing: backingStoreType, defer: flag)
         
-        self.level = .popUpMenu
-        self.isOpaque = false
+        self.level = .normal
+        self.isOpaque = true
         self.backgroundColor = .clear
         self.hasShadow = true
         
         // Enable layer and set corner radius
         self.contentView?.wantsLayer = true
-        self.contentView?.layer?.cornerRadius = 20
-        self.contentView?.layer?.masksToBounds = true
+        self.contentView?.layer?.cornerRadius = 28
+        self.contentView?.layer?.masksToBounds = false
+    }
+    
+    override var canBecomeKey: Bool {
+        return true
     }
 }
 

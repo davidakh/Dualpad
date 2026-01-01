@@ -10,6 +10,7 @@ import AppKit
 
 enum Mode: String, CaseIterable {
     case none = "Unknown"
+    case other = "Other Controllers"
     case emulation = "Emulation"
     case haptics = "Haptics"
     case adaptive = "Adaptive Triggers"
@@ -20,7 +21,6 @@ enum Mode: String, CaseIterable {
 }
 
 struct MenuView: View {
-    
     @State private var mode: Mode = .none
     @State private var controllerManager = DualsenseManager()
     @State private var appData = AppData()
@@ -30,13 +30,18 @@ struct MenuView: View {
             if mode != .none {
                 Toolbar(name: .constant(mode.rawValue), onBack: { mode = .none })
                     .transition(.blurReplace)
+            } else {
+                Controller(controllerInfo: controllerManager.primaryController)
             }
-            
-            Controller(controllerInfo: controllerManager.primaryController)
-            
-            modeView()
+                modeView()
         }
-        .padding(8)
+        .padding(.top, 9)
+        .padding(.horizontal, 8)
+        .padding(.bottom, 8)
+        .glassEffect(in: RoundedRectangle(cornerRadius: 28))
+        .shadow(color: .black.opacity(0.3), radius: 16, x: 0, y: 8)
+        .frame(width: 320)
+        .fixedSize()
         .environment(controllerManager)
         .environment(appData)
         .onAppear {
@@ -54,7 +59,6 @@ struct MenuView: View {
         .onChange(of: appData.mouseAcceleration) { _, newValue in
             controllerManager.touchpadManager?.acceleration = Float(newValue)
         }
-        .glassEffect(in: RoundedRectangle(cornerRadius: 28))
     }
     
     @ViewBuilder
@@ -78,6 +82,10 @@ struct MenuView: View {
             DebugView()
         } else {
             ContainerView(
+                otherEnabled: Binding (
+                    get: { mode == .other },
+                    set: { if $0 { mode = .other } else if mode == .other { mode = .none } }
+                ),
                 emulationEnabled: Binding(
                     get: { mode == .emulation },
                     set: { if $0 { mode = .emulation } else if mode == .emulation { mode = .none } }

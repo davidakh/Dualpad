@@ -9,6 +9,9 @@ import SwiftUI
 
 struct ContainerView: View {
     
+    @Binding var otherEnabled: Bool
+    @State private var otherHover = true
+    
     @Binding var emulationEnabled: Bool
     @State private var emulationHover = false
     
@@ -31,8 +34,35 @@ struct ContainerView: View {
     @Binding var debugEnabled: Bool
     @State private var debugHover = false
     
+    @State private var settingsEnabled = false
+    @State private var settingsHover = false
+    
     var body: some View {
         VStack(spacing: 2) {
+            Item(interactive: false,
+                 hoverable: true,
+                 enabled: $otherEnabled,
+                 hover: $otherHover,
+                 symbol: "gamecontroller",
+                 color: .accent,
+                 fill: false,
+                 offset: 0,
+                 animation: .none,
+                 name: "Other Controllers",
+                 showDescription: false,
+                 description: "",
+                 showElement: true,
+                 element: "chevron.right")
+            
+            if !otherHover && !emulationHover {
+                Divider()
+                    .padding(.horizontal, 6)
+            } else {
+                Rectangle()
+                    .frame(height: 1)
+                    .foregroundStyle(.clear)
+            }
+            
             Item(interactive: false,
                  enabled: $emulationEnabled,
                  hover: $emulationHover,
@@ -109,8 +139,14 @@ struct ContainerView: View {
                 }
             })
             
-            Divider()
-                .padding(.horizontal, 6)
+            if !touchpadHover && !experimentalHover {
+                Divider()
+                    .padding(.horizontal, 6)
+            } else {
+                Rectangle()
+                    .frame(height: 1)
+                    .foregroundStyle(.clear)
+            }
             
             Item(interactive: false,
                  enabled: $experimentalEnabled,
@@ -139,6 +175,29 @@ struct ContainerView: View {
                  description: "",
                  showElement: true,
                  element: "chevron.right")
+            
+            if !debugHover && !settingsHover {
+                Divider()
+                    .padding(.horizontal, 6)
+            } else {
+                Rectangle()
+                    .frame(height: 1)
+                    .foregroundStyle(.clear)
+            }
+            
+            Item(interactive: false,
+                 enabled: $settingsEnabled,
+                 hover: $settingsHover,
+                 symbol: "gear",
+                 color: .accent,
+                 fill: false,
+                 offset: 0,
+                 animation: .none,
+                 name: "Settings",
+                 showDescription: false,
+                 description: "",
+                 showElement: true,
+                 element: "arrow.up.right")
         }
     }
 }
