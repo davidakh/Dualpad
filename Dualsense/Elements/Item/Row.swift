@@ -17,23 +17,23 @@ enum SymbolAnimation {
 }
 
 struct Row: View {
-    var interactive: Bool
-    var enabled: Bool
+    var interactive: Bool = false
+    var enabled: Bool = false
     
-    var symbol: String
-    var color: Color
-    var fill: Bool
-    var offset: CGFloat
+    var symbol: String = ""
+    var color: Color = .accent
+    var fill: Bool = false
+    var offset: CGFloat = 0
     var animation: SymbolAnimation
     
-    var name: String
+    var name: String = ""
     
-    var showDescription: Bool
-    var description: String
+    var showDescription: Bool = false
+    var description: String = ""
     
-    var showElement: Bool
-    var element: String
-    var isElementButton: Bool
+    var showElement: Bool = false
+    var element: String = ""
+    var isElementButton: Bool = false
     var elementButtonAction: (() -> Void)?
     
     var body: some View {

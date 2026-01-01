@@ -14,6 +14,12 @@ class AppData {
     var mode: Mode = .none
     var menuSymbol: String = "gamecontroller.fill"
     
+    var menuBarCornerRadius: Double = 20.0 {
+        didSet {
+            UserDefaults.standard.set(menuBarCornerRadius, forKey: "menuBarCornerRadius")
+        }
+    }
+    
     // Light
     var lightBrightness: Double = 1.0 {
         didSet {
@@ -66,6 +72,10 @@ class AppData {
         
         if UserDefaults.standard.object(forKey: "mouseAcceleration") != nil {
             self.mouseAcceleration = UserDefaults.standard.double(forKey: "mouseAcceleration")
+        }
+        
+        if UserDefaults.standard.object(forKey: "menuBarCornerRadius") != nil {
+            self.menuBarCornerRadius = UserDefaults.standard.double(forKey: "menuBarCornerRadius")
         }
     }
     

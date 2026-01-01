@@ -8,8 +8,14 @@
 import SwiftUI
 
 struct Alert: View {
+    var name: String = "Name"
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        HStack {
+            Text(name)
+                .font(.headline)
+        }
+        .frame(height: 48)
     }
 }
 

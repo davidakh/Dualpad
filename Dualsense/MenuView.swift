@@ -108,6 +108,7 @@ struct MenuView: View {
         .onChange(of: appData.mouseAcceleration) { _, newValue in
             controllerManager.touchpadManager?.acceleration = Float(newValue)
         }
+        .clipShape(RoundedRectangle(cornerRadius: 32))
     }
 }
 
