@@ -22,10 +22,8 @@ struct ContainerView: View {
     @State private var lightHover = false
     
     @Binding var touchpadEnabled: Bool
+    @Binding var touchpadMenu: Bool
     @State private var touchpadHover = false
-    
-    @Binding var gyroEnabled: Bool
-    @State private var gyroHover = false
     
     @Binding var experimentalEnabled: Bool
     @State private var experimentalHover = false
@@ -91,7 +89,7 @@ struct ContainerView: View {
                  showElement: true,
                  element: "chevron.right")
             
-            Item(interactive: false,
+            Item(interactive: true,
                  enabled: $touchpadEnabled,
                  hover: $touchpadHover,
                  symbol: "pointer.arrow.ipad",
@@ -103,21 +101,16 @@ struct ContainerView: View {
                  showDescription: false,
                  description: "",
                  showElement: true,
-                 element: "chevron.right")
+                 element: "slider.horizontal.3",
+                 isElementButton: true,
+                 elementButtonAction: {
+                withAnimation {
+                    touchpadMenu.toggle()
+                }
+            })
             
-            Item(interactive: false,
-                 enabled: $gyroEnabled,
-                 hover: $gyroHover,
-                 symbol: "rotate.3d",
-                 color: .accent,
-                 fill: false,
-                 offset: 0,
-                 animation: .none,
-                 name: "Gyro",
-                 showDescription: false,
-                 description: "",
-                 showElement: true,
-                 element: "chevron.right")
+            Divider()
+                .padding(.horizontal, 6)
             
             Item(interactive: false,
                  enabled: $experimentalEnabled,

@@ -17,40 +17,13 @@ struct TouchpadView: View {
         if let touchpadManager = dualsenseManager.touchpadManager {
             touchpadContent(for: touchpadManager)
         } else {
-            Text("Touchpad manager not available")
-                .foregroundStyle(.secondary)
+            ContentUnavailableView("Touchpad Unavailable", systemImage: "hand.tap", description: Text("Connect a DualSense controller to use the touchpad."))
         }
     }
     
     @ViewBuilder
     private func touchpadContent(for touchpadManager: TouchpadManager) -> some View {
         VStack(spacing: 12) {
-            // Main toggle
-            VStack(alignment: .center, spacing: 2) {
-                Item(interactive: true,
-                     enabled: Binding(
-                        get: { appData.mouseActive },
-                        set: { appData.mouseActive = $0 }
-                     ),
-                     hover: $mouseHover,
-                     symbol: "cursorarrow.click.2",
-                     color: .accent,
-                     fill: false,
-                     offset: 0,
-                     animation: .bounce,
-                     name: "Touchpad to Mouse",
-                     showDescription: true,
-                     description: appData.mouseActive ? "System-wide cursor control" : "Enable for mouse control",
-                     showElement: true,
-                     element: "slider.horizontal.3",
-                     isElementButton: true,
-                     elementButtonAction: {
-                        withAnimation {
-                            menuPresent.toggle()
-                        }
-                     })
-            }
-            
             if menuPresent {
                 VStack(spacing: 8) {
                     VStack(alignment: .leading, spacing: 4) {
@@ -71,7 +44,7 @@ struct TouchpadView: View {
                             Slider(value: Binding(
                                 get: { appData.mouseSensitivity },
                                 set: { appData.mouseSensitivity = $0 }
-                            ), in: 0.1...1.0)
+                            ), in: 0.1...0.5, step: 0.1)
                             
                             Image(systemName: "hare")
                                 .font(.system(size: 10))
@@ -101,7 +74,7 @@ struct TouchpadView: View {
                             Slider(value: Binding(
                                 get: { appData.mouseAcceleration },
                                 set: { appData.mouseAcceleration = $0 }
-                            ), in: 0.1...1.0)
+                            ), in: 0.1...0.5, step: 0.1)
                             
                             Image(systemName: "gauge.with.dots.needle.100percent")
                                 .font(.system(size: 12))
@@ -128,8 +101,7 @@ struct TouchpadView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
                 }
-                .transition(.opacity.combined(with: .move(edge: .top)))
-                .animation(.easeInOut, value: appData.mouseActive)
+                .transition(.blurReplace)
             }
         }
     }

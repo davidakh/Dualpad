@@ -19,9 +19,9 @@ struct Toolbar: View {
                 }
             }) {
                 Image(systemName: "chevron.left")
-                    .font(.system(size: 12, weight: .heavy))
+                    .font(.system(size: 10, weight: .heavy))
                     .offset(x: 0.5)
-                    .frame(width: 24, height: 24)
+                    .frame(width: 20, height: 20)
                     .background(Color.fill)
                     .clipShape(Circle())
             }
@@ -30,13 +30,13 @@ struct Toolbar: View {
             Spacer()
             
             Text(name)
-                .font(.system(size: 16))
+                .font(.headline)
                 .fontWeight(.semibold)
             
             Spacer()
             
             Rectangle()
-                .frame(width: 24, height: 24)
+                .frame(width: 20, height: 20)
                 .foregroundStyle(.clear)
         }
         .padding(6)

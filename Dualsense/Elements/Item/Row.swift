@@ -39,7 +39,7 @@ struct Row: View {
     var body: some View {
         HStack {
             Image(systemName: enabled && fill && interactive ? "\(symbol).fill" : "\(symbol)")
-                .font(.system(size: 12))
+                .font(.system(size: 10))
                 .apply { view in
                     switch animation {
                     case .none:
@@ -57,14 +57,14 @@ struct Row: View {
                     }
                 }
                 .foregroundStyle(enabled && interactive ? color : .secondary)
-                .frame(width: 24, height: 24)
+                .frame(width: 20, height: 20)
                 .offset(x: offset)
                 .background(enabled && interactive ? Color.white : .fill)
                 .clipShape(Circle())
             
-            VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(name)
-                    .font(.body)
+                    .font(.system(size: 14))
                     .fontWeight(.regular)
                 
                 if showDescription && enabled {
@@ -82,14 +82,15 @@ struct Row: View {
                         Image(systemName: element)
                             .font(.system(size: 12))
                             .foregroundStyle(.tertiary)
-                            .frame(width: 24, height: 24)
+                            .frame(width: 20, height: 20)
+                            .contentMargins(32)
                     }
                     .buttonStyle(.plain)
                 } else {
                     Image(systemName: element)
                         .font(.system(size: 12))
                         .foregroundStyle(.tertiary)
-                        .frame(width: 24, height: 24)
+                        .frame(width: 20, height: 20)
                 }
             }
         }
@@ -97,7 +98,6 @@ struct Row: View {
     }
 }
 
-// Helper extension to apply conditional modifiers
 extension View {
     func apply<V: View>(@ViewBuilder _ transform: (Self) -> V) -> V {
         transform(self)
