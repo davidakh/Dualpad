@@ -45,14 +45,46 @@ struct Toolbar: View {
 }
 
 struct BottomToolbar: View {
+    @State private var hover = false
+    @Binding var hidden: Bool
+    @Binding var action: Bool
+    var symbol: String = "chevron.compact.up"
+    
     var body: some View {
         HStack {
             Spacer()
+                .frame(width: 20)
+            
+            Spacer()
+            
+            Button(action: {
+                withAnimation {
+                    action.toggle()
+                }
+            }) {
+                Image(systemName: symbol)
+                    .font(.system(size: 16))
+                    .frame(width: 32, height: 12)
+                    .background(hover ? Color.fill : .clear)
+                    .clipShape(Capsule())
+                    .padding(.horizontal, 6)
+                    .onHover{ hovering in
+                        hover = hovering
+                    }
+            }
+            
+            Spacer()
+            
             Image(systemName: "ellipsis")
                 .font(.system(size: 10))
                 .foregroundStyle(.secondary)
                 .frame(width: 20, height: 20)
                 .background(Color.fill)
+                .clipShape(Circle())
         }
+        .padding(.horizontal, 6)
+        .padding(.top, hidden ? 0 : 6)
+        .padding(.bottom, 6)
+        .buttonStyle(.plain)
     }
 }

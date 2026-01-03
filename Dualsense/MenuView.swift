@@ -21,33 +21,20 @@ enum Mode: String, CaseIterable {
 }
 
 struct MenuView: View {
-    @State private var containerPresent = true
+    @State private var hidden = true
     @State private var mode: Mode = .none
     @State private var controllerManager = DualsenseManager()
     @State private var appData = AppData()
     
     var body: some View {
         VStack(spacing: 6) {
-            if mode != .none {
-                Toolbar(name: .constant(mode.rawValue), onBack: { mode = .none })
-                    .transition(.blurReplace)
-            } else {
-                Controller(controllerInfo: controllerManager.primaryController)
-            }
+            topView()
             
-            if containerPresent {
+            if hidden {
                 modeView()
             }
             
-            Button(action: {
-                withAnimation {
-                    containerPresent.toggle()
-                }
-            }) {
-                Arrow(symbol: containerPresent ? "chevron.compact.up" : "chevron.compact.down")
-            }
-            
-            BottomToolbar()
+            bottomView()
         }
         .padding(6)
         .glassEffect(in: RoundedRectangle(cornerRadius: 28))
@@ -86,6 +73,16 @@ struct MenuView: View {
             if !newValue {
                 controllerManager.touchpadManager?.isEnabled = false
             }
+        }
+    }
+    
+    @ViewBuilder
+    private func topView() -> some View {
+        if mode != .none {
+            Toolbar(name: .constant(mode.rawValue), onBack: { mode = .none })
+                .transition(.blurReplace)
+        } else {
+            Controller(controllerInfo: controllerManager.primaryController)
         }
     }
     
@@ -149,6 +146,11 @@ struct MenuView: View {
             )
             .transition(.blurReplace)
         }
+    }
+    
+    @ViewBuilder
+    private func bottomView() -> some View {
+        BottomToolbar(hidden: $hidden, action: $hidden, symbol: hidden ? "chevron.compact.up" : "chevron.compact.down")
     }
 }
 
