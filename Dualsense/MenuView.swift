@@ -46,6 +46,8 @@ struct MenuView: View {
             }) {
                 Arrow(symbol: containerPresent ? "chevron.compact.up" : "chevron.compact.down")
             }
+            
+            BottomToolbar()
         }
         .padding(6)
         .glassEffect(in: RoundedRectangle(cornerRadius: 28))
@@ -62,13 +64,28 @@ struct MenuView: View {
             controllerManager.setLightBarBrightness(newValue)
         }
         .onChange(of: appData.mouseActive) { _, newValue in
-            controllerManager.touchpadManager?.isEnabled = newValue
+            // Only enable touchpad mouse if there's a controller connected
+            if newValue && controllerManager.isConnected {
+                controllerManager.touchpadManager?.isEnabled = true
+            } else {
+                controllerManager.touchpadManager?.isEnabled = false
+            }
         }
         .onChange(of: appData.mouseSensitivity) { _, newValue in
             controllerManager.touchpadManager?.sensitivity = Float(newValue)
         }
         .onChange(of: appData.mouseAcceleration) { _, newValue in
             controllerManager.touchpadManager?.acceleration = Float(newValue)
+        }
+        .onChange(of: controllerManager.isConnected) { _, newValue in
+            // If the user wants mouseActive and a controller was just connected, enable the feature
+            if newValue && appData.mouseActive {
+                controllerManager.touchpadManager?.isEnabled = true
+            }
+            // If the controller is disconnected, disable the feature
+            if !newValue {
+                controllerManager.touchpadManager?.isEnabled = false
+            }
         }
     }
     
