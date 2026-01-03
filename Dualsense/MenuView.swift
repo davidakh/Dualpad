@@ -10,14 +10,7 @@ import AppKit
 
 enum Mode: String, CaseIterable {
     case none = "Unknown"
-    case other = "Other Controllers"
-    case emulation = "Emulation"
-    case haptics = "Haptics"
-    case adaptive = "Adaptive Triggers"
-    case light = "Light"
     case touchpad = "Touchpad"
-    case experimental = "Experimental"
-    case debug = "Debug"
 }
 
 struct MenuView: View {
@@ -46,9 +39,6 @@ struct MenuView: View {
         .environment(appData)
         .onAppear {
             appData.syncToDualsenseManager(controllerManager)
-        }
-        .onChange(of: appData.lightBrightness) { _, newValue in
-            controllerManager.setLightBarBrightness(newValue)
         }
         .onChange(of: appData.mouseActive) { _, newValue in
             // Only enable touchpad mouse if there's a controller connected
@@ -88,64 +78,16 @@ struct MenuView: View {
     
     @ViewBuilder
     private func modeView() -> some View {
-        if mode == .haptics {
-            HapticsView()
-                .transition(.blurReplace)
-        } else if mode == .adaptive {
-            AdaptiveView()
-                .transition(.blurReplace)
-        } else if mode == .light {
-            LightView(dualsenseManager: controllerManager)
-                .transition(.blurReplace)
-        } else if mode == .touchpad {
-            TouchpadView()
-                .transition(.blurReplace)
-        } else if mode == .experimental {
-            ExperimentalView()
-                .transition(.blurReplace)
-        } else if mode == .debug {
-            DebugView()
-        } else {
-            ContainerView(
-                otherEnabled: Binding (
-                    get: { mode == .other },
-                    set: { if $0 { mode = .other } else if mode == .other { mode = .none } }
-                ),
-                emulationEnabled: Binding(
-                    get: { mode == .emulation },
-                    set: { if $0 { mode = .emulation } else if mode == .emulation { mode = .none } }
-                ),
-                hapticsEnabled: Binding(
-                    get: { mode == .haptics },
-                    set: { if $0 { mode = .haptics } else if mode == .haptics { mode = .none } }
-                ),
-                adaptiveEnabled: Binding(
-                    get: { mode == .adaptive },
-                    set: { if $0 { mode = .adaptive } else if mode == .adaptive { mode = .none } }
-                ),
-                lightEnabled: Binding(
-                    get: { mode == .light },
-                    set: { if $0 { mode = .light } else if mode == .light { mode = .none } }
-                ),
-                touchpadEnabled: Binding(
-                    get: { appData.mouseActive },
-                    set: { appData.mouseActive = $0 }
-                ),
-                touchpadMenu: Binding(
-                    get: { mode == .touchpad },
-                    set: { if $0 { mode = .touchpad } else if mode == .touchpad { mode = .none } }
-                ),
-                experimentalEnabled: Binding(
-                    get: { mode == .experimental },
-                    set: { if $0 { mode = .experimental } else if mode == .experimental { mode = .none } }
-                ),
-                debugEnabled: Binding(
-                    get: { mode == .debug },
-                    set: { if $0 { mode = .debug } else if mode == .debug { mode = .none } }
-                )
+        ContainerView(
+            touchpadEnabled: Binding(
+                get: { appData.mouseActive },
+                set: { appData.mouseActive = $0 }
+            ),
+            touchpadMenu: Binding(
+                get: { mode == .touchpad },
+                set: { if $0 { mode = .touchpad } else if mode == .touchpad { mode = .none } }
             )
-            .transition(.blurReplace)
-        }
+        )
     }
     
     @ViewBuilder
