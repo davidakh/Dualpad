@@ -21,7 +21,7 @@ struct ContainerView: View {
                  color: .accent,
                  fill: false,
                  offset: 0.5,
-                 animation: .none,
+                 animation: .bounce,
                  name: "Touchpad",
                  showDescription: false,
                  description: "",

@@ -11,8 +11,7 @@ import SwiftUI
 @Observable
 class AppData {
     // Menu
-    var mode: Mode = .none
-    var menuSymbol: String = "pointer.arrow.ipad.square.fill"
+    var menuSymbol: String = "DualsenseIcon"
     
     var menuBarCornerRadius: Double = 20.0 {
         didSet {

@@ -8,16 +8,12 @@
 import SwiftUI
 import AppKit
 
-enum Mode: String, CaseIterable {
-    case none = "Unknown"
-    case touchpad = "Touchpad"
-}
-
 struct MenuView: View {
-    @State private var hidden = true
-    @State private var mode: Mode = .none
-    @State private var controllerManager = DualsenseManager()
     @State private var appData = AppData()
+    @State private var controllerManager = DualsenseManager()
+    
+    @State private var hidden = true
+    @State private var settingsPresent = false
     
     var body: some View {
         VStack(spacing: 6) {
@@ -41,7 +37,6 @@ struct MenuView: View {
             appData.syncToDualsenseManager(controllerManager)
         }
         .onChange(of: appData.mouseActive) { _, newValue in
-            // Only enable touchpad mouse if there's a controller connected
             if newValue && controllerManager.isConnected {
                 controllerManager.touchpadManager?.isEnabled = true
             } else {
@@ -55,11 +50,9 @@ struct MenuView: View {
             controllerManager.touchpadManager?.acceleration = Float(newValue)
         }
         .onChange(of: controllerManager.isConnected) { _, newValue in
-            // If the user wants mouseActive and a controller was just connected, enable the feature
             if newValue && appData.mouseActive {
                 controllerManager.touchpadManager?.isEnabled = true
             }
-            // If the controller is disconnected, disable the feature
             if !newValue {
                 controllerManager.touchpadManager?.isEnabled = false
             }
@@ -68,26 +61,20 @@ struct MenuView: View {
     
     @ViewBuilder
     private func topView() -> some View {
-        if mode != .none {
-            Toolbar(name: .constant(mode.rawValue), onBack: { mode = .none })
-                .transition(.blurReplace)
-        } else {
-            Controller(controllerInfo: controllerManager.primaryController)
-        }
+        Controller(controllerInfo: controllerManager.primaryController)
     }
     
     @ViewBuilder
     private func modeView() -> some View {
-        ContainerView(
-            touchpadEnabled: Binding(
-                get: { appData.mouseActive },
-                set: { appData.mouseActive = $0 }
-            ),
-            touchpadMenu: Binding(
-                get: { mode == .touchpad },
-                set: { if $0 { mode = .touchpad } else if mode == .touchpad { mode = .none } }
+        VStack(spacing: 6) {
+            ContainerView(
+                touchpadEnabled: $appData.mouseActive,
+                touchpadMenu: $settingsPresent
             )
-        )
+            if settingsPresent {
+                TouchpadView()
+            }
+        }
     }
     
     @ViewBuilder

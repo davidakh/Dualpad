@@ -269,14 +269,14 @@ class TouchpadManager {
                 let scrollDeltaX = CGFloat(smoothedScrollDeltaX * scrollAccelerationMultiplier * baseScrollMultiplier)
                 let scrollDeltaY = CGFloat(smoothedScrollDeltaY * scrollAccelerationMultiplier * baseScrollMultiplier)
                 
-                scrollVelocityX = -scrollDeltaX
+                scrollVelocityX = scrollDeltaX
                 scrollVelocityY = -scrollDeltaY
                 
                 accumulatedScrollX += scrollDeltaX
-                accumulatedScrollY += scrollDeltaY
+                accumulatedScrollY += -scrollDeltaY
                 
                 if abs(accumulatedScrollX) >= 0.5 || abs(accumulatedScrollY) >= 0.5 {
-                    performScroll(deltaX: -accumulatedScrollX, deltaY: -accumulatedScrollY)
+                    performScroll(deltaX: accumulatedScrollX, deltaY: accumulatedScrollY)
                     accumulatedScrollX = 0
                     accumulatedScrollY = 0
                 }

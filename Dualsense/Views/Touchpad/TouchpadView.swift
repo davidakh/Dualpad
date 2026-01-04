@@ -10,99 +10,114 @@ import SwiftUI
 struct TouchpadView: View {
     @Environment(DualsenseManager.self) private var dualsenseManager
     @Environment(AppData.self) private var appData
-    @State private var mouseHover = false
-    @State private var menuPresent = false
+    
+    @State private var inverted = false
     
     var body: some View {
         if let touchpadManager = dualsenseManager.touchpadManager {
             touchpadContent(for: touchpadManager)
-        } else {
-            ContentUnavailableView("Touchpad Unavailable", systemImage: "hand.tap", description: Text("Connect a DualSense controller to use the touchpad."))
         }
     }
     
     @ViewBuilder
     private func touchpadContent(for touchpadManager: TouchpadManager) -> some View {
         VStack(spacing: 12) {
-            if menuPresent {
-                VStack(spacing: 8) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text("Sensitivity")
-                                .font(.body)
-                                .fontWeight(.semibold)
-                            
-                            Spacer()
-                        }
+            VStack(spacing: 8) {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("Sensitivity")
+                            .font(.body)
+                            .fontWeight(.semibold)
                         
-                        HStack(spacing: 4) {
-                            Image(systemName: "tortoise")
-                                .font(.system(size: 10))
-                                .foregroundStyle(.secondary)
-                                .frame(width: 24, height: 24)
-                            
-                            Slider(value: Binding(
-                                get: { appData.mouseSensitivity },
-                                set: { appData.mouseSensitivity = $0 }
-                            ), in: 0.1...0.5, step: 0.1)
-                            
-                            Image(systemName: "hare")
-                                .font(.system(size: 10))
-                                .foregroundStyle(.secondary)
-                                .frame(width: 24, height: 24)
-                        }
+                        Spacer()
                     }
-                    .padding(12)
-                    .background(Color.fill)
-                    .clipShape(RoundedRectangle(cornerRadius: 24))
                     
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text("Acceleration")
-                                .font(.body)
-                                .fontWeight(.semibold)
-                            
-                            Spacer()
-                        }
+                    HStack(spacing: 4) {
+                        Image(systemName: "tortoise")
+                            .font(.system(size: 10))
+                            .foregroundStyle(.secondary)
+                            .frame(width: 24, height: 24)
                         
-                        HStack(spacing: 4) {
-                            Image(systemName: "gauge.with.dots.needle.0percent")
-                                .font(.system(size: 12))
-                                .foregroundStyle(.secondary)
-                                .frame(width: 24, height: 24)
-                            
-                            Slider(value: Binding(
-                                get: { appData.mouseAcceleration },
-                                set: { appData.mouseAcceleration = $0 }
-                            ), in: 0.1...0.5, step: 0.1)
-                            
-                            Image(systemName: "gauge.with.dots.needle.100percent")
-                                .font(.system(size: 12))
-                                .foregroundStyle(.secondary)
-                                .frame(width: 24, height: 24)
-                        }
-                    }
-                    .padding(12)
-                    .background(Color.fill)
-                    .clipShape(RoundedRectangle(cornerRadius: 24))
-                    
-                    // Accessibility permission warning
-                    if !TouchpadManager.checkAccessibilityPermissions() {
-                        HStack(spacing: 8) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundStyle(.orange)
-                                .font(.caption)
-                            Text("Requires Accessibility permissions")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
-                        .padding(8)
-                        .background(.orange.opacity(0.1))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        Slider(value: Binding(
+                            get: { appData.mouseSensitivity },
+                            set: { appData.mouseSensitivity = $0 }
+                        ), in: 0.1...0.5, step: 0.1)
+                        
+                        Image(systemName: "hare")
+                            .font(.system(size: 10))
+                            .foregroundStyle(.secondary)
+                            .frame(width: 24, height: 24)
                     }
                 }
-                .transition(.blurReplace)
+                .padding(12)
+                .background(Color.fill)
+                .clipShape(RoundedRectangle(cornerRadius: 24))
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("Acceleration")
+                            .font(.body)
+                            .fontWeight(.semibold)
+                        
+                        Spacer()
+                    }
+                    
+                    HStack(spacing: 4) {
+                        Image(systemName: "gauge.with.dots.needle.0percent")
+                            .font(.system(size: 12))
+                            .foregroundStyle(.secondary)
+                            .frame(width: 24, height: 24)
+                        
+                        Slider(value: Binding(
+                            get: { appData.mouseAcceleration },
+                            set: { appData.mouseAcceleration = $0 }
+                        ), in: 0.1...0.5, step: 0.1)
+                        
+                        Image(systemName: "gauge.with.dots.needle.100percent")
+                            .font(.system(size: 12))
+                            .foregroundStyle(.secondary)
+                            .frame(width: 24, height: 24)
+                    }
+                }
+                .padding(12)
+                .background(Color.fill)
+                .clipShape(RoundedRectangle(cornerRadius: 24))
+                
+                HStack {
+                    Image(systemName: "hand.draw")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 24, height: 24)
+                    Toggle(isOn: $inverted) {
+                        HStack {
+                            Text("Inverted Scrolling")
+                                .font(.body)
+                                .fontWeight(.semibold)
+                            Spacer()
+                        }
+                    }
+                    .toggleStyle(.switch)
+                }
+                .padding(12)
+                .background(Color.fill)
+                .clipShape(RoundedRectangle(cornerRadius: 24))
+                
+                // Accessibility permission warning
+                if !TouchpadManager.checkAccessibilityPermissions() {
+                    HStack(spacing: 8) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+                            .font(.caption)
+                        Text("Requires Accessibility permissions")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(8)
+                    .background(.orange.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
             }
+            .transition(.blurReplace)
         }
     }
 }
