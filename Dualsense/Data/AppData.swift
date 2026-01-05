@@ -11,25 +11,11 @@ import SwiftUI
 @Observable
 class AppData {
     // Menu
-    var mode: Mode = .none
-    var menuSymbol: String = "gamecontroller.fill"
+    var menuSymbol: String = "DualsenseIcon"
     
     var menuBarCornerRadius: Double = 20.0 {
         didSet {
             UserDefaults.standard.set(menuBarCornerRadius, forKey: "menuBarCornerRadius")
-        }
-    }
-    
-    // Light
-    var lightBrightness: Double = 1.0 {
-        didSet {
-            UserDefaults.standard.set(lightBrightness, forKey: "lightBrightness")
-        }
-    }
-    
-    var lightColor = "none" {
-        didSet {
-            UserDefaults.standard.set(lightColor, forKey: "lightColor")
         }
     }
     
@@ -53,15 +39,6 @@ class AppData {
     }
     
     init() {
-        // Loader
-        if UserDefaults.standard.object(forKey: "lightBrightness") != nil {
-            self.lightBrightness = UserDefaults.standard.double(forKey: "lightBrightness")
-        }
-        
-        if let savedColor = UserDefaults.standard.string(forKey: "lightColor") {
-            self.lightColor = savedColor
-        }
-        
         if UserDefaults.standard.object(forKey: "mouseActive") != nil {
             self.mouseActive = UserDefaults.standard.bool(forKey: "mouseActive")
         }
@@ -81,11 +58,12 @@ class AppData {
     
     // Synchronization
     func syncToDualsenseManager(_ manager: DualsenseManager) {
-        manager.setLightBarBrightness(lightBrightness)
+        // Set the flag so touchpad will auto-enable when controller connects
+        manager.shouldEnableTouchpadOnConnect = mouseActive
         
         // Synchronization with TouchpadManager
         if let touchpadManager = manager.touchpadManager {
-            touchpadManager.isEnabled = mouseActive
+            touchpadManager.isEnabled = mouseActive && manager.isConnected
             touchpadManager.sensitivity = Float(mouseSensitivity)
             touchpadManager.acceleration = Float(mouseAcceleration)
         }
@@ -93,8 +71,6 @@ class AppData {
     
     // Update
     func updateFromDualsenseManager(_ manager: DualsenseManager) {
-        lightBrightness = manager.lightBarBrightness
-        
         if let touchpadManager = manager.touchpadManager {
             mouseActive = touchpadManager.isEnabled
             mouseSensitivity = Double(touchpadManager.sensitivity)

@@ -25,6 +25,13 @@ class TouchpadManager {
     
     private var scrollSpeed: Float = 0.9
     
+    // Adaptive polling
+    private var currentPollingInterval: Int = 4 // Start at 125Hz (8ms)
+    private let highPollInterval: Int = 4 // 125Hz - active use
+    private let lowPollInterval: Int = 33 // 30Hz - idle
+    private var idleFrameCount: Int = 0
+    private let idleThreshold: Int = 120 // ~1 second at 125Hz before reducing polling
+    
     private var lastTouchPosition: (x: Float, y: Float)? = nil
     private var isTouching: Bool = false
     private var wasPressed: Bool = false
@@ -44,7 +51,7 @@ class TouchpadManager {
     
     private var smoothedScrollDeltaX: Float = 0
     private var smoothedScrollDeltaY: Float = 0
-    private let scrollSmoothingFactor: Float = 0.5
+    private let scrollSmoothingFactor: Float = 1
     
     private var accumulatedX: CGFloat = 0
     private var accumulatedY: CGFloat = 0
@@ -100,8 +107,12 @@ class TouchpadManager {
         
         setupHapticEngine()
         
-        displayLink = DispatchSource.makeTimerSource(flags: .strict, queue: .main)
-        displayLink?.schedule(deadline: .now(), repeating: .milliseconds(4), leeway: .milliseconds(0))
+        // Start with high polling rate
+        currentPollingInterval = highPollInterval
+        idleFrameCount = 0
+        
+        displayLink = DispatchSource.makeTimerSource(queue: .main)
+        displayLink?.schedule(deadline: .now(), repeating: .milliseconds(currentPollingInterval), leeway: .milliseconds(2))
         displayLink?.setEventHandler { [weak self] in
             guard let self = self else { return }
             
@@ -124,10 +135,13 @@ class TouchpadManager {
             
             self.handleTouchpadUpdate(touchpadState)
             self.handleTouchpadButtonUpdate(isPressed: touchpadPressed)
+            
+            // Adaptive polling: reduce rate when idle
+            self.updatePollingRate()
         }
         displayLink?.resume()
         
-        print("􀺰 Touchpad mouse control started (cursor, scroll, right-click, 250Hz polling, system-wide)")
+        print("􀺰 Touchpad mouse control started (cursor, scroll, right-click, adaptive 30-125Hz polling, system-wide)")
     }
     
     private func stopTracking() {
@@ -162,6 +176,67 @@ class TouchpadManager {
         scrollVelocityX = 0
         scrollVelocityY = 0
         consecutiveSlowMovementFrames = 0
+        idleFrameCount = 0
+        currentPollingInterval = highPollInterval
+    }
+    
+    private func updatePollingRate() {
+        let isActive = isTouching || isTwoFingerTouch || abs(scrollVelocityX) > momentumThreshold || abs(scrollVelocityY) > momentumThreshold
+        
+        if isActive {
+            // Reset idle counter when active
+            idleFrameCount = 0
+            
+            // Switch to high polling if needed
+            if currentPollingInterval != highPollInterval {
+                currentPollingInterval = highPollInterval
+                rescheduleTimer()
+                print("⚡ Touchpad active - increased to 250Hz polling")
+            }
+        } else {
+            // Increment idle counter
+            idleFrameCount += 1
+            
+            // Switch to low polling after idle threshold
+            if idleFrameCount >= idleThreshold && currentPollingInterval != lowPollInterval {
+                currentPollingInterval = lowPollInterval
+                rescheduleTimer()
+                print("🔋 Touchpad idle - reduced to 30Hz polling")
+            }
+        }
+    }
+    
+    private func rescheduleTimer() {
+        displayLink?.cancel()
+        
+        displayLink = DispatchSource.makeTimerSource(queue: .main)
+        displayLink?.schedule(deadline: .now(), repeating: .milliseconds(currentPollingInterval), leeway: .milliseconds(2))
+        displayLink?.setEventHandler { [weak self] in
+            guard let self = self else { return }
+            
+            guard let manager = self.dualsenseManager,
+                  let controller = manager.controller,
+                  let dualSensePad = controller.extendedGamepad as? GCDualSenseGamepad else {
+                return
+            }
+            
+            let primaryX = dualSensePad.touchpadPrimary.xAxis.value
+            let primaryY = dualSensePad.touchpadPrimary.yAxis.value
+            let secondaryX = dualSensePad.touchpadSecondary.xAxis.value
+            let secondaryY = dualSensePad.touchpadSecondary.yAxis.value
+            let touchpadPressed = dualSensePad.touchpadButton.isPressed
+            
+            let touchpadState = DualsenseManager.TouchpadStates(
+                primary: (x: primaryX, y: primaryY),
+                secondary: (x: secondaryX, y: secondaryY)
+            )
+            
+            self.handleTouchpadUpdate(touchpadState)
+            self.handleTouchpadButtonUpdate(isPressed: touchpadPressed)
+            
+            self.updatePollingRate()
+        }
+        displayLink?.resume()
     }
     
     private func handleTouchpadButtonUpdate(isPressed: Bool) {
@@ -269,14 +344,14 @@ class TouchpadManager {
                 let scrollDeltaX = CGFloat(smoothedScrollDeltaX * scrollAccelerationMultiplier * baseScrollMultiplier)
                 let scrollDeltaY = CGFloat(smoothedScrollDeltaY * scrollAccelerationMultiplier * baseScrollMultiplier)
                 
-                scrollVelocityX = -scrollDeltaX
+                scrollVelocityX = scrollDeltaX
                 scrollVelocityY = -scrollDeltaY
                 
                 accumulatedScrollX += scrollDeltaX
-                accumulatedScrollY += scrollDeltaY
+                accumulatedScrollY += -scrollDeltaY
                 
                 if abs(accumulatedScrollX) >= 0.5 || abs(accumulatedScrollY) >= 0.5 {
-                    performScroll(deltaX: -accumulatedScrollX, deltaY: -accumulatedScrollY)
+                    performScroll(deltaX: accumulatedScrollX, deltaY: accumulatedScrollY)
                     accumulatedScrollX = 0
                     accumulatedScrollY = 0
                 }

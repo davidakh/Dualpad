@@ -60,18 +60,8 @@ class DualsenseManager {
     // Primary controller reference
     private(set) var controller: GCController?
     
-    // Light bar properties
-    var lightBarColor: Color? = Color(red: 0.0, green: 0.3, blue: 1.0) {
-        didSet {
-            updateLightBarColor()
-        }
-    }
-    
-    var lightBarBrightness: Double = 1.0 {
-        didSet {
-            updateLightBarColor()
-        }
-    }
+    // Flag to track if touchpad should be enabled when controller connects
+    var shouldEnableTouchpadOnConnect: Bool = false
     
     // Button states
     struct ButtonStates {
@@ -218,6 +208,15 @@ class DualsenseManager {
             
             // Install background monitor
             installBackgroundMonitor()
+            
+            // Enable touchpad if it was previously enabled (saved in UserDefaults)
+            if shouldEnableTouchpadOnConnect {
+                // Small delay to ensure controller is fully configured
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                    self?.touchpadManager?.isEnabled = true
+                    print("🎮 Auto-enabled touchpad mouse control (restored from saved state)")
+                }
+            }
         }
     }
     
@@ -289,9 +288,6 @@ class DualsenseManager {
     private func configureController(_ controller: GCController) {
         controller.playerIndex = .index1
         
-        // Set light bar color
-        updateLightBarColor()
-        
         // Log haptics availability
         if let haptics = controller.haptics {
             print("Haptics available: \(haptics.supportedLocalities)")
@@ -353,38 +349,6 @@ class DualsenseManager {
                 self?.touchpadStates.secondary = (xValue, yValue)
             }
         }
-    }
-    
-    private func updateLightBarColor() {
-        guard let controller = controller, let light = controller.light else { return }
-        
-        // If color is nil, turn off the light (set to black)
-        guard let lightBarColor = lightBarColor else {
-            light.color = GCColor(red: 0.0, green: 0.0, blue: 0.0)
-            print("Light bar turned off")
-            return
-        }
-        
-        // Convert SwiftUI Color to RGB components with brightness applied
-        let nsColor = NSColor(lightBarColor)
-        guard let rgbColor = nsColor.usingColorSpace(.deviceRGB) else { return }
-        
-        // Apply brightness by scaling RGB values
-        let adjustedRed = Float(rgbColor.redComponent * lightBarBrightness)
-        let adjustedGreen = Float(rgbColor.greenComponent * lightBarBrightness)
-        let adjustedBlue = Float(rgbColor.blueComponent * lightBarBrightness)
-        
-        light.color = GCColor(red: adjustedRed, green: adjustedGreen, blue: adjustedBlue)
-        
-        print("Light bar updated - Color: RGB(\(adjustedRed), \(adjustedGreen), \(adjustedBlue)), Brightness: \(lightBarBrightness)")
-    }
-    
-    func setLightBarColor(_ color: Color?) {
-        lightBarColor = color
-    }
-    
-    func setLightBarBrightness(_ brightness: Double) {
-        lightBarBrightness = max(0.0, min(1.0, brightness))
     }
     
     func refresh() {
