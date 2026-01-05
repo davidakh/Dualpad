@@ -58,9 +58,12 @@ class AppData {
     
     // Synchronization
     func syncToDualsenseManager(_ manager: DualsenseManager) {
+        // Set the flag so touchpad will auto-enable when controller connects
+        manager.shouldEnableTouchpadOnConnect = mouseActive
+        
         // Synchronization with TouchpadManager
         if let touchpadManager = manager.touchpadManager {
-            touchpadManager.isEnabled = mouseActive
+            touchpadManager.isEnabled = mouseActive && manager.isConnected
             touchpadManager.sensitivity = Float(mouseSensitivity)
             touchpadManager.acceleration = Float(mouseAcceleration)
         }

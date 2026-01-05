@@ -34,7 +34,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             button.target = self
         }
         
-        // Create floating panel - extra size to accommodate shadow
+        // Observe appData changes to update icon
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(updateStatusItemImage),
+            name: NSNotification.Name("UpdateMenuIcon"),
+            object: nil
+        )
+    }
+    
+    private func createPanelIfNeeded() {
+        guard floatingPanel == nil else { return }
+        
+        // Create floating panel lazily when first needed
         floatingPanel = FloatingPanel(
             contentRect: NSRect(x: 0, y: 0, width: 280, height: 500),
             styleMask: [.borderless, .nonactivatingPanel],
@@ -49,17 +61,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 .clipShape(RoundedRectangle(cornerRadius: 28))
                 .environment(appData)
         )
-        
-        // Observe appData changes to update icon
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(updateStatusItemImage),
-            name: NSNotification.Name("UpdateMenuIcon"),
-            object: nil
-        )
     }
     
     @objc func togglePanel() {
+        // Create panel on first use
+        createPanelIfNeeded()
+        
         guard let panel = floatingPanel, let button = statusItem?.button else { return }
         
         if panel.isVisible {
@@ -82,9 +89,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 image.isTemplate = true // Makes it adapt to menu bar appearance
                 
                 // Resize to standard menu bar icon size (18x18 points)
-                let resizedImage = NSImage(size: NSSize(width: 20, height: 20))
+                let resizedImage = NSImage(size: NSSize(width: 18, height: 18))
                 resizedImage.lockFocus()
-                image.draw(in: NSRect(x: 0, y: 0, width: 20, height: 20))
+                image.draw(in: NSRect(x: 0, y: 0, width: 18, height: 18))
                 resizedImage.unlockFocus()
                 resizedImage.isTemplate = true
                 

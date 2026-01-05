@@ -37,6 +37,9 @@ struct MenuView: View {
             appData.syncToDualsenseManager(controllerManager)
         }
         .onChange(of: appData.mouseActive) { _, newValue in
+            // Update the flag so it persists across controller disconnects/reconnects
+            controllerManager.shouldEnableTouchpadOnConnect = newValue
+            
             if newValue && controllerManager.isConnected {
                 controllerManager.touchpadManager?.isEnabled = true
             } else {

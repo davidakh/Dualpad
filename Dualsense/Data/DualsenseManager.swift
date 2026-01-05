@@ -60,6 +60,9 @@ class DualsenseManager {
     // Primary controller reference
     private(set) var controller: GCController?
     
+    // Flag to track if touchpad should be enabled when controller connects
+    var shouldEnableTouchpadOnConnect: Bool = false
+    
     // Button states
     struct ButtonStates {
         var triangle = false
@@ -205,6 +208,15 @@ class DualsenseManager {
             
             // Install background monitor
             installBackgroundMonitor()
+            
+            // Enable touchpad if it was previously enabled (saved in UserDefaults)
+            if shouldEnableTouchpadOnConnect {
+                // Small delay to ensure controller is fully configured
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                    self?.touchpadManager?.isEnabled = true
+                    print("🎮 Auto-enabled touchpad mouse control (restored from saved state)")
+                }
+            }
         }
     }
     
