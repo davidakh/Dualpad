@@ -11,9 +11,9 @@ class TouchpadManager {
     
     var isEnabled: Bool = false {
         didSet {
-            if isEnabled {
+            if isEnabled && !oldValue {
                 startTracking()
-            } else {
+            } else if !isEnabled && oldValue {
                 stopTracking()
             }
         }
@@ -100,7 +100,7 @@ class TouchpadManager {
         
         if !Self.checkAccessibilityPermissions() {
             print("􀇾 Touchpad control requires Accessibility permissions to work outside the app")
-            print("   Go to System Settings > Privacy & Security > Accessibility")
+            print("􂕯 Go to System Settings > Privacy & Security > Accessibility")
         }
         
         startBackgroundActivity()
@@ -113,7 +113,7 @@ class TouchpadManager {
         
         scheduleTimer(interval: currentPollingInterval)
         
-        print("􀺰 Touchpad mouse control started (cursor, scroll, right-click, adaptive 10-125Hz polling, system-wide)")
+        print("􀺰 Touchpad mouse control started")
     }
     
     private func stopTracking() {
@@ -127,7 +127,7 @@ class TouchpadManager {
         
         stopBackgroundActivity()
         
-        print("Touchpad mouse control stopped")
+        print("􀺰 Touchpad mouse control stopped")
     }
     
     private func resetState() {
@@ -217,6 +217,7 @@ class TouchpadManager {
     private func handleTouchpadButtonUpdate(isPressed: Bool) {
         if isPressed && !wasPressed {
             simulateClick()
+            print("􀬁 Single-finger tap detected - left-click")
         }
         wasPressed = isPressed
     }
@@ -295,7 +296,7 @@ class TouchpadManager {
             } else if !didPerformRightClick && timeSinceStart >= 0.5 && totalMovement < 0.02 {
                 simulateRightClick()
                 didPerformRightClick = true
-                print("Two-finger tap detected - right-click")
+                print("􀬁 Two-finger tap detected - right-click")
             } else if totalMovement > 0.02 {
                 didPerformRightClick = true
                 
@@ -372,7 +373,7 @@ class TouchpadManager {
             accumulatedX += finalDeltaX
             accumulatedY += finalDeltaY
             
-            if abs(accumulatedX) >= 0.5 || abs(accumulatedY) >= 0.5 {
+            if abs(accumulatedX) >= 0.25 || abs(accumulatedY) >= 0.25 {
                 moveCursor(deltaX: accumulatedX, deltaY: accumulatedY)
                 accumulatedX = 0
                 accumulatedY = 0
@@ -408,7 +409,7 @@ class TouchpadManager {
         
         if let scrollEvent = CGEvent(scrollWheelEvent2Source: nil,
                                      units: .pixel,
-                                     wheelCount: 2,
+                                     wheelCount: 1,
                                      wheel1: Int32(deltaY),
                                      wheel2: Int32(deltaX),
                                      wheel3: 0) {
@@ -507,7 +508,7 @@ class TouchpadManager {
             self.hapticPlayer = player
             
         } catch {
-            print("Failed to set up haptic feedback: \(error.localizedDescription)")
+            print("􁎄 Failed to set up haptic feedback: \(error.localizedDescription)")
         }
     }
     
@@ -535,7 +536,7 @@ class TouchpadManager {
         // .userInitiatedAllowingIdleSystemSleep allows system sleep but keeps processing alive
         backgroundActivity = ProcessInfo.processInfo.beginActivity(
             options: [.userInitiatedAllowingIdleSystemSleep],
-            reason: "DualSense touchpad mouse control"
+            reason: "􀛸 DualSense touchpad mouse control"
         )
     }
     

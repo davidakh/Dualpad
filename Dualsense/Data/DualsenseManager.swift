@@ -232,14 +232,14 @@ class DualsenseManager {
         if self.controller == nil {
             self.controller = controller
             configureController(controller)
-            print("DualSense Controller connected: \(info.name) via \(info.connectionType.description)")
+            print("􀉤 DualSense Controller connected: \(info.name) via \(info.connectionType.description)")
             
             // Enable touchpad if it was previously enabled (saved in UserDefaults)
             if shouldEnableTouchpadOnConnect {
                 // Small delay to ensure controller is fully configured
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
                     self?.touchpadManager?.isEnabled = true
-                    print("🎮 Auto-enabled touchpad mouse control (restored from saved state)")
+                    print("􀛸 Auto-enabled touchpad mouse control (restored from saved state)")
                 }
             }
         }
@@ -256,7 +256,7 @@ class DualsenseManager {
         if self.controller == controller {
             self.controller = nil
             buttonStates = ButtonStates()
-            print("DualSense Controller disconnected")
+            print("􂮿 DualSense Controller disconnected")
             
             // Brief discovery attempt to find another controller (with timeout)
             startTimeLimitedDiscovery()
@@ -312,7 +312,7 @@ class DualsenseManager {
         
         // Log haptics availability
         if let haptics = controller.haptics {
-            print("Haptics available: \(haptics.supportedLocalities)")
+            print("􁎄 Haptics available")
         }
         
         // Configure button handlers for DualSense
@@ -379,7 +379,7 @@ class DualsenseManager {
     
     func startDiscovery() {
         startTimeLimitedDiscovery()
-        print("Started wireless controller discovery (auto-stops after 3s)...")
+        print("􀖀 Started wireless controller discovery (auto-stops after 3s)...")
     }
     
     func stopDiscovery() {
@@ -389,7 +389,7 @@ class DualsenseManager {
         if isDiscoveryActive {
             GCController.stopWirelessControllerDiscovery()
             isDiscoveryActive = false
-            print("Stopped wireless controller discovery")
+            print("􁅒 Stopped wireless controller discovery")
         }
     }
 }
