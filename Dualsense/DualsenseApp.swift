@@ -25,6 +25,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var appData = AppData()
     
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Make this a menu bar only app (no dock icon)
+        NSApp.setActivationPolicy(.accessory)
+        
         // Create status bar item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
@@ -71,6 +74,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         
         if panel.isVisible {
             panel.orderOut(nil)
+            NSApp.hide(nil)
         } else {
             // Position panel below menu bar icon
             let buttonRect = button.window?.convertToScreen(button.convert(button.bounds, to: nil)) ?? .zero
@@ -78,6 +82,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             let panelY = buttonRect.minY - panel.frame.height - 8
             
             panel.setFrameOrigin(NSPoint(x: panelX, y: panelY))
+            
+            // Activate the app and show panel
+            NSApp.activate(ignoringOtherApps: true)
             panel.makeKeyAndOrderFront(nil)
         }
     }
@@ -109,8 +116,8 @@ class FloatingPanel: NSPanel {
     override init(contentRect: NSRect, styleMask style: NSWindow.StyleMask, backing backingStoreType: NSWindow.BackingStoreType, defer flag: Bool) {
         super.init(contentRect: contentRect, styleMask: style, backing: backingStoreType, defer: flag)
         
-        self.level = .normal
-        self.isOpaque = true
+        self.level = .popUpMenu
+        self.isOpaque = false
         self.backgroundColor = .clear
         self.hasShadow = true
         
@@ -122,6 +129,10 @@ class FloatingPanel: NSPanel {
     
     override var canBecomeKey: Bool {
         return true
+    }
+    
+    override var canBecomeMain: Bool {
+        return false
     }
 }
 

@@ -26,7 +26,7 @@ struct MenuView: View {
             bottomView()
         }
         .padding(6)
-        .glassEffect(in: RoundedRectangle(cornerRadius: 28))
+        .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 28))
         .shadow(color: .black.opacity(0.3), radius: 16, x: 0, y: 8)
         .frame(width: 280)
         .fixedSize()

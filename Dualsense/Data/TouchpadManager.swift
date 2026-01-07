@@ -26,8 +26,8 @@ class TouchpadManager {
     private var scrollSpeed: Float = 0.9
     
     // Adaptive polling
-    private var currentPollingInterval: Int = 4 // Start at 125Hz (8ms)
-    private let highPollInterval: Int = 4 // 125Hz - active use
+    private var currentPollingInterval: Int = 8 // Start at 125Hz (8ms)
+    private let highPollInterval: Int = 8 // 125Hz - active use
     private let lowPollInterval: Int = 33 // 30Hz - idle
     private var idleFrameCount: Int = 0
     private let idleThreshold: Int = 120 // ~1 second at 125Hz before reducing polling
@@ -47,7 +47,7 @@ class TouchpadManager {
     
     private var smoothedDeltaX: Float = 0
     private var smoothedDeltaY: Float = 0
-    private let smoothingFactor: Float = 0.4
+    private let smoothingFactor: Float = 1
     
     private var smoothedScrollDeltaX: Float = 0
     private var smoothedScrollDeltaY: Float = 0
@@ -65,8 +65,8 @@ class TouchpadManager {
     private let momentumThreshold: CGFloat = 0.1
     
     private var consecutiveSlowMovementFrames: Int = 0
-    private let slowMovementThreshold: Float = 0.003
-    private let dampeningFactor: Float = 0.3
+    private let slowMovementThreshold: Float = 1
+    private let dampeningFactor: Float = 0.25
     
     private weak var dualsenseManager: DualsenseManager?
     
@@ -74,7 +74,7 @@ class TouchpadManager {
     private var hapticPlayer: CHHapticPatternPlayer?
     
     private var screenBounds: CGRect {
-        NSScreen.main?.frame ?? CGRect(x: 0, y: 0, width: 1920, height: 1080)
+        NSScreen.main?.frame ?? CGRect(x: 0, y: 0, width: 2560, height: 1440)
     }
     
     init(dualsenseManager: DualsenseManager? = nil) {
@@ -316,8 +316,8 @@ class TouchpadManager {
             let totalMovement = sqrt(avgDeltaX * avgDeltaX + avgDeltaY * avgDeltaY)
             let timeSinceStart = Date().timeIntervalSince(gestureStart)
             
-            if !didPerformRightClick && timeSinceStart < 0.3 && totalMovement < 0.02 {
-            } else if !didPerformRightClick && timeSinceStart >= 0.3 && totalMovement < 0.02 {
+            if !didPerformRightClick && timeSinceStart < 0.5 && totalMovement < 0.02 {
+            } else if !didPerformRightClick && timeSinceStart >= 0.5 && totalMovement < 0.02 {
                 simulateRightClick()
                 didPerformRightClick = true
                 print("Two-finger tap detected - right-click")
@@ -505,8 +505,9 @@ class TouchpadManager {
         do {
             guard let engine = try haptics.createEngine(withLocality: .handles) else { return }
             
-            let sharpness: Float = 1.0
-            let intensity: Float = 1.0
+            let sharpness: Float = 0.1
+            let intensity: Float = 0.1
+            let time: Float = 0.1
             
             let pattern = try CHHapticPattern(
                 events: [
@@ -514,7 +515,8 @@ class TouchpadManager {
                         eventType: .hapticTransient,
                         parameters: [
                             CHHapticEventParameter(parameterID: .hapticIntensity, value: intensity),
-                            CHHapticEventParameter(parameterID: .hapticSharpness, value: sharpness)
+                            CHHapticEventParameter(parameterID: .hapticSharpness, value: sharpness),
+                            CHHapticEventParameter(parameterID: .releaseTime, value: time)
                         ],
                         relativeTime: 0
                     )
