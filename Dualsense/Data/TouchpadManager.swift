@@ -25,12 +25,12 @@ class TouchpadManager {
     
     private var scrollSpeed: Float = 0.9
     
-    // Adaptive polling
+    // Adaptive polling - more aggressive idle reduction
     private var currentPollingInterval: Int = 8 // Start at 125Hz (8ms)
     private let highPollInterval: Int = 8 // 125Hz - active use
-    private let lowPollInterval: Int = 33 // 30Hz - idle
+    private let lowPollInterval: Int = 100 // 10Hz - idle (was 33ms/30Hz, now much lower)
     private var idleFrameCount: Int = 0
-    private let idleThreshold: Int = 120 // ~1 second at 125Hz before reducing polling
+    private let idleThreshold: Int = 60 // ~0.5 second at 125Hz before reducing polling
     
     private var lastTouchPosition: (x: Float, y: Float)? = nil
     private var isTouching: Bool = false
@@ -111,37 +111,9 @@ class TouchpadManager {
         currentPollingInterval = highPollInterval
         idleFrameCount = 0
         
-        displayLink = DispatchSource.makeTimerSource(queue: .main)
-        displayLink?.schedule(deadline: .now(), repeating: .milliseconds(currentPollingInterval), leeway: .milliseconds(2))
-        displayLink?.setEventHandler { [weak self] in
-            guard let self = self else { return }
-            
-            guard let manager = self.dualsenseManager,
-                  let controller = manager.controller,
-                  let dualSensePad = controller.extendedGamepad as? GCDualSenseGamepad else { 
-                return 
-            }
-            
-            let primaryX = dualSensePad.touchpadPrimary.xAxis.value
-            let primaryY = dualSensePad.touchpadPrimary.yAxis.value
-            let secondaryX = dualSensePad.touchpadSecondary.xAxis.value
-            let secondaryY = dualSensePad.touchpadSecondary.yAxis.value
-            let touchpadPressed = dualSensePad.touchpadButton.isPressed
-            
-            let touchpadState = DualsenseManager.TouchpadStates(
-                primary: (x: primaryX, y: primaryY),
-                secondary: (x: secondaryX, y: secondaryY)
-            )
-            
-            self.handleTouchpadUpdate(touchpadState)
-            self.handleTouchpadButtonUpdate(isPressed: touchpadPressed)
-            
-            // Adaptive polling: reduce rate when idle
-            self.updatePollingRate()
-        }
-        displayLink?.resume()
+        scheduleTimer(interval: currentPollingInterval)
         
-        print("􀺰 Touchpad mouse control started (cursor, scroll, right-click, adaptive 30-125Hz polling, system-wide)")
+        print("􀺰 Touchpad mouse control started (cursor, scroll, right-click, adaptive 10-125Hz polling, system-wide)")
     }
     
     private func stopTracking() {
@@ -180,6 +152,44 @@ class TouchpadManager {
         currentPollingInterval = highPollInterval
     }
     
+    /// Schedules the timer with the given interval - single source of truth for timer creation
+    private func scheduleTimer(interval: Int) {
+        displayLink?.cancel()
+        
+        displayLink = DispatchSource.makeTimerSource(queue: .main)
+        displayLink?.schedule(deadline: .now(), repeating: .milliseconds(interval), leeway: .milliseconds(2))
+        displayLink?.setEventHandler { [weak self] in
+            self?.pollTouchpad()
+        }
+        displayLink?.resume()
+    }
+    
+    /// Single polling function called by the timer
+    private func pollTouchpad() {
+        guard let manager = dualsenseManager,
+              let controller = manager.controller,
+              let dualSensePad = controller.extendedGamepad as? GCDualSenseGamepad else {
+            return
+        }
+        
+        let primaryX = dualSensePad.touchpadPrimary.xAxis.value
+        let primaryY = dualSensePad.touchpadPrimary.yAxis.value
+        let secondaryX = dualSensePad.touchpadSecondary.xAxis.value
+        let secondaryY = dualSensePad.touchpadSecondary.yAxis.value
+        let touchpadPressed = dualSensePad.touchpadButton.isPressed
+        
+        let touchpadState = DualsenseManager.TouchpadStates(
+            primary: (x: primaryX, y: primaryY),
+            secondary: (x: secondaryX, y: secondaryY)
+        )
+        
+        handleTouchpadUpdate(touchpadState)
+        handleTouchpadButtonUpdate(isPressed: touchpadPressed)
+        
+        // Adaptive polling: reduce rate when idle
+        updatePollingRate()
+    }
+    
     private func updatePollingRate() {
         let isActive = isTouching || isTwoFingerTouch || abs(scrollVelocityX) > momentumThreshold || abs(scrollVelocityY) > momentumThreshold
         
@@ -190,8 +200,7 @@ class TouchpadManager {
             // Switch to high polling if needed
             if currentPollingInterval != highPollInterval {
                 currentPollingInterval = highPollInterval
-                rescheduleTimer()
-                print("⚡ Touchpad active - increased to 250Hz polling")
+                scheduleTimer(interval: currentPollingInterval)
             }
         } else {
             // Increment idle counter
@@ -200,43 +209,9 @@ class TouchpadManager {
             // Switch to low polling after idle threshold
             if idleFrameCount >= idleThreshold && currentPollingInterval != lowPollInterval {
                 currentPollingInterval = lowPollInterval
-                rescheduleTimer()
-                print("🔋 Touchpad idle - reduced to 30Hz polling")
+                scheduleTimer(interval: currentPollingInterval)
             }
         }
-    }
-    
-    private func rescheduleTimer() {
-        displayLink?.cancel()
-        
-        displayLink = DispatchSource.makeTimerSource(queue: .main)
-        displayLink?.schedule(deadline: .now(), repeating: .milliseconds(currentPollingInterval), leeway: .milliseconds(2))
-        displayLink?.setEventHandler { [weak self] in
-            guard let self = self else { return }
-            
-            guard let manager = self.dualsenseManager,
-                  let controller = manager.controller,
-                  let dualSensePad = controller.extendedGamepad as? GCDualSenseGamepad else {
-                return
-            }
-            
-            let primaryX = dualSensePad.touchpadPrimary.xAxis.value
-            let primaryY = dualSensePad.touchpadPrimary.yAxis.value
-            let secondaryX = dualSensePad.touchpadSecondary.xAxis.value
-            let secondaryY = dualSensePad.touchpadSecondary.yAxis.value
-            let touchpadPressed = dualSensePad.touchpadButton.isPressed
-            
-            let touchpadState = DualsenseManager.TouchpadStates(
-                primary: (x: primaryX, y: primaryY),
-                secondary: (x: secondaryX, y: secondaryY)
-            )
-            
-            self.handleTouchpadUpdate(touchpadState)
-            self.handleTouchpadButtonUpdate(isPressed: touchpadPressed)
-            
-            self.updatePollingRate()
-        }
-        displayLink?.resume()
     }
     
     private func handleTouchpadButtonUpdate(isPressed: Bool) {
@@ -556,25 +531,18 @@ class TouchpadManager {
     private func startBackgroundActivity() {
         guard backgroundActivity == nil else { return }
         
+        // Use minimal options needed for touchpad control
+        // .userInitiatedAllowingIdleSystemSleep allows system sleep but keeps processing alive
         backgroundActivity = ProcessInfo.processInfo.beginActivity(
-            options: [
-                .userInitiated,
-                .idleSystemSleepDisabled,
-                .suddenTerminationDisabled,
-                .automaticTerminationDisabled,
-                .background
-            ],
-            reason: "DualSense touchpad mouse control requires continuous background processing"
+            options: [.userInitiatedAllowingIdleSystemSleep],
+            reason: "DualSense touchpad mouse control"
         )
-        
-        print("🔋 Background activity started - App Nap disabled for touchpad control")
     }
     
     private func stopBackgroundActivity() {
         if let activity = backgroundActivity {
             ProcessInfo.processInfo.endActivity(activity)
             backgroundActivity = nil
-            print("🔋 Background activity stopped - App Nap re-enabled")
         }
     }
     

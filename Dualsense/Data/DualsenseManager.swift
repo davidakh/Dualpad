@@ -63,6 +63,10 @@ class DualsenseManager {
     // Flag to track if touchpad should be enabled when controller connects
     var shouldEnableTouchpadOnConnect: Bool = false
     
+    // Discovery management - prevent continuous scanning
+    private var discoveryTimer: DispatchSourceTimer?
+    private var isDiscoveryActive: Bool = false
+    
     // Button states
     struct ButtonStates {
         var triangle = false
@@ -94,9 +98,6 @@ class DualsenseManager {
     
     // Touchpad Manager
     private(set) var touchpadManager: TouchpadManager?
-    
-    // Background monitor for system-wide events
-    private var backgroundMonitor: Any?
     
     var primaryController: DualSenseInfo? {
         connectedControllers.first
@@ -138,7 +139,6 @@ class DualsenseManager {
     deinit {
         removeControllerNotifications()
         stopDiscovery()
-        removeBackgroundMonitor()
     }
     
     private func setupControllerNotifications() {
@@ -171,8 +171,33 @@ class DualsenseManager {
     }
     
     private func checkForExistingControllers() {
-        GCController.startWirelessControllerDiscovery()
+        // First check already-connected controllers (no discovery needed)
         scanForControllers()
+        
+        // Only start discovery if no controllers found, and auto-stop after 3 seconds
+        if connectedControllers.isEmpty {
+            startTimeLimitedDiscovery()
+        }
+    }
+    
+    /// Starts wireless discovery with automatic timeout to prevent continuous CPU usage
+    private func startTimeLimitedDiscovery() {
+        guard !isDiscoveryActive else { return }
+        
+        isDiscoveryActive = true
+        GCController.startWirelessControllerDiscovery { [weak self] in
+            // Discovery completion handler - called when discovery completes or is stopped
+            self?.isDiscoveryActive = false
+        }
+        
+        // Auto-stop discovery after 3 seconds to save CPU
+        discoveryTimer?.cancel()
+        discoveryTimer = DispatchSource.makeTimerSource(queue: .main)
+        discoveryTimer?.schedule(deadline: .now() + 3.0)
+        discoveryTimer?.setEventHandler { [weak self] in
+            self?.stopDiscovery()
+        }
+        discoveryTimer?.resume()
     }
     
     private func scanForControllers() {
@@ -191,7 +216,10 @@ class DualsenseManager {
     private func handleControllerConnected(_ controller: GCController) {
         guard isDualSenseController(controller) else { return }
         
-        // Enable background event monitoring
+        // Stop discovery once a controller connects - saves CPU
+        stopDiscovery()
+        
+        // Enable background event monitoring (this is handled by the framework, not us)
         GCController.shouldMonitorBackgroundEvents = true
         
         let info = createControllerInfo(from: controller)
@@ -205,9 +233,6 @@ class DualsenseManager {
             self.controller = controller
             configureController(controller)
             print("DualSense Controller connected: \(info.name) via \(info.connectionType.description)")
-            
-            // Install background monitor
-            installBackgroundMonitor()
             
             // Enable touchpad if it was previously enabled (saved in UserDefaults)
             if shouldEnableTouchpadOnConnect {
@@ -227,17 +252,14 @@ class DualsenseManager {
         // Stop touchpad mouse control when controller disconnects
         touchpadManager?.isEnabled = false
         
-        // Remove background monitor
-        removeBackgroundMonitor()
-        
         // Clear primary controller if it was disconnected
         if self.controller == controller {
             self.controller = nil
             buttonStates = ButtonStates()
             print("DualSense Controller disconnected")
             
-            // Try to reconnect to another DualSense if available
-            GCController.startWirelessControllerDiscovery()
+            // Brief discovery attempt to find another controller (with timeout)
+            startTimeLimitedDiscovery()
         }
     }
     
@@ -356,30 +378,18 @@ class DualsenseManager {
     }
     
     func startDiscovery() {
-        GCController.startWirelessControllerDiscovery()
-        print("Started wireless controller discovery...")
+        startTimeLimitedDiscovery()
+        print("Started wireless controller discovery (auto-stops after 3s)...")
     }
     
     func stopDiscovery() {
-        GCController.stopWirelessControllerDiscovery()
-        print("Stopped wireless controller discovery")
-    }
-    
-    // MARK: - Background Monitor
-    
-    /// Installs a global event monitor for background input events
-    private func installBackgroundMonitor() {
-        guard backgroundMonitor == nil else { return }
-        backgroundMonitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { _ in
-            // No-op: this keeps the runloop active and events flowing for background operation
-        }
-    }
-    
-    /// Removes the background input event monitor
-    private func removeBackgroundMonitor() {
-        if let monitor = backgroundMonitor {
-            NSEvent.removeMonitor(monitor)
-            backgroundMonitor = nil
+        discoveryTimer?.cancel()
+        discoveryTimer = nil
+        
+        if isDiscoveryActive {
+            GCController.stopWirelessControllerDiscovery()
+            isDiscoveryActive = false
+            print("Stopped wireless controller discovery")
         }
     }
 }
