@@ -1,6 +1,6 @@
-## Dualsense
+## Dualpad
 
-Dualsense is a simple macos application that enhances the features offered by a Dualsense controller. Currently it only offers features such as controlling the light of the controller's lightbar and using the controllers touchpad as a system-wide mouse with gestures such as left click, right click, and scroll.
+DualSense is a simple MacOS application that allows you to use your DualSense's touchpad to control your mouse on your Mac. Currently supporting gestures as left clicking, right clicking, and scrolling.  
 
 ## Requirements
 
